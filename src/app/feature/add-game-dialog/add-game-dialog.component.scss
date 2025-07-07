@@ -13,11 +13,18 @@ mat-radio-group {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
+  padding: 8px;
+
+  border: 1px solid;
+  border-radius: 8px;
+  
+  background-color: #E5E5E5;
 }
 
-.loser-input {
-  width: 180px;
+.tiles-input,
+.total-points-input {
+  width: 160px;
   min-width: 120px;
   margin-bottom: 0;
 }
@@ -53,29 +60,13 @@ mat-radio-group {
   width: 100%;
 }
 
-.penalty-receiver-label {
-  margin-top: 8px;
-
-  .mat-chip {
-    font-size: 13px;
-    background: #e3f2fd;
-    color: #1976d2;
-  }
-}
-
-.player-container {
-  border-bottom: 1px solid;
-  margin-bottom: 24px;
-  background-color: #e8e8e8;
-}
-
 @media (max-width: 600px) {
   .player-row {
     flex-direction: column;
     gap: 4px;
   }
-
-  .loser-input,
+  .tiles-input,
+  .total-points-input,
   .extended-per-player,
   .extended-input,
   .penalty-amount-input {

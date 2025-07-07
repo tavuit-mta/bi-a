@@ -14,20 +14,29 @@
     <form [formGroup]="losersForm">
       <p class="loser-title"><strong>Nhập điểm cho từng người chơi:</strong></p>
       <div *ngFor="let player of gameState?.players; let i = index">
-        <div class="player-container">
-          <mat-form-field appearance="outline" class="loser-input">
-            <mat-label>
-              {{ player.id === form.value?.winner ? player.name + ' (Thắng)' : player.name }}
-            </mat-label>
+        <div class="player-row">
+          <mat-form-field appearance="fill" class="total-points-input">
+            <mat-label>Tổng điểm {{ player.name }}</mat-label>
             <input
               matInput
               type="number"
-              [formControlName]="player.id"
-              [readonly]="player.id === form.value?.winner"
-              [disabled]="player.id === form.value?.winner"
+              [value]="totalPoints[i]"
+              disabled
+              tabindex="-1"
+              style="pointer-events: none;"
             />
+            <!-- <mat-hint>Tổng điểm (bao gồm quân còn lại)</mat-hint> -->
           </mat-form-field>
-          <div class="extended-per-player" [formGroup]="extendedGroup(i)">
+          <mat-form-field appearance="outline" class="tiles-input">
+            <mat-label>Số lá còn lại</mat-label>
+            <input
+              matInput
+              type="number"
+              [formControl]="remainingForm(i)"
+            />
+            <!-- <mat-hint>Nhập số quân còn lại (+/-)</mat-hint> -->
+          </mat-form-field>
+          <div class="extended-per-player" [formGroup]="extendedForm(i)">
             <!-- Common Points Row -->
             <div class="extended-row">
               <mat-checkbox formControlName="hasCommon">Điểm chung</mat-checkbox>
@@ -44,13 +53,13 @@
               <ng-container *ngIf="extendedArray.at(i).value.hasPenalty">
                 <div class="penalty-payers-list">
                   <div *ngFor="let payerCtrl of getPenaltyPayersFormArray(i).controls; let j = index">
-                    <mat-checkbox [formControl]="getFormControl(payerCtrl, 'selected')"  *ngIf="i !== j">
+                    <mat-checkbox [formControl]="penaltyControl(payerCtrl, 'selected')" *ngIf="i !== j">
                       {{ gameState.players[j].name }}
                     </mat-checkbox>
-                    <ng-container *ngIf="getFormControl(payerCtrl, 'selected').value && i !== j">
+                    <ng-container *ngIf="penaltyControl(payerCtrl, 'selected').value && i !== j">
                       <mat-form-field appearance="outline" class="penalty-amount-input">
-                        <mat-label>Điểm đền của {{ gameState.players[j].name }}</mat-label>
-                        <input matInput type="number" [formControl]="getFormControl(payerCtrl, 'amount')" min="1" />
+                        <mat-label>Điểm {{ gameState.players[j].name }} đền</mat-label>
+                        <input matInput type="number" [formControl]="penaltyControl(payerCtrl, 'amount')" min="1" />
                       </mat-form-field>
                     </ng-container>
                   </div>

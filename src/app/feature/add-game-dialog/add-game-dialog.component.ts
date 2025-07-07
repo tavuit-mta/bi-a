@@ -14,12 +14,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
-interface PenaltyPayer {
-  id: number;
-  selected: boolean;
-  amount: number | null;
-}
-
 @Component({
   standalone: true,
   selector: 'app-add-game-dialog',
@@ -42,6 +36,7 @@ interface PenaltyPayer {
 export class AddGameDialogComponent implements OnInit {
   form!: FormGroup;
   gameState!: GameState;
+  totalPoints: number[] = [];
 
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
@@ -51,20 +46,24 @@ export class AddGameDialogComponent implements OnInit {
     return this.form.get('extended') as FormArray;
   }
 
+  extendedForm(i: number): FormGroup {
+    return this.extendedArray.at(i) as FormGroup;
+  }
+
+  get remainingTilesArray(): FormArray {
+    return this.form.get('remainingTiles') as FormArray;
+  }
+
+  remainingForm(i: number): FormControl {
+    return this.remainingTilesArray.at(i) as FormControl;
+  }
+
   get nPlayers(): number {
     return this.gameState?.players?.length || 0;
   }
 
-  extendedGroup(i: number): FormGroup {
-    return this.extendedArray.at(i) as FormGroup;
-  }
-
-  getPenaltyPayersFormArray(i: number): FormArray {
-    return (this.extendedArray.at(i).get('penaltyPayers') as FormArray);
-  }
-
-  getFormControl(control: AbstractControl, type: 'amount' | 'selected'): FormControl {
-    return control.get(type) as FormControl;
+  penaltyControl(control: AbstractControl, type: 'selected' | 'amount'): FormControl {
+    return (control.get(type) as FormControl);
   }
 
   constructor(
@@ -80,7 +79,8 @@ export class AddGameDialogComponent implements OnInit {
       this.form = this.fb.group({
         winner: [null, Validators.required],
         losers: this.fb.group({}),
-        extended: this.fb.array([])
+        extended: this.fb.array([]),
+        remainingTiles: this.fb.array([])
       });
 
       // Add controls for each player
@@ -89,28 +89,29 @@ export class AddGameDialogComponent implements OnInit {
           player.id.toString(),
           new FormControl({ value: 0, disabled: false })
         );
-        // Penalty payers: one FormGroup per other player
-        const penaltyPayersArray = this.fb.array(
-          state.players.map((p, j) =>
-            this.fb.group({
-              id: p.id,
-              selected: [false],
-              amount: [null]
-            })
-          )
-        );
         (this.form.get('extended') as FormArray).push(
           this.fb.group({
             hasCommon: [false],
             commonPoints: [null],
             hasPenalty: [false],
-            penaltyPayers: penaltyPayersArray
+            penaltyPayers: this.fb.array(
+              state.players.map((p, j) =>
+                this.fb.group({
+                  id: p.id,
+                  selected: [false],
+                  amount: [null]
+                })
+              )
+            )
           })
+        );
+        (this.form.get('remainingTiles') as FormArray).push(
+          new FormControl(0)
         );
       });
 
-      this.form.get('winner')!.valueChanges.subscribe(() => {
-        // this.updateWinnerInput();
+      this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
+        this.updateWinnerInput(winnerId);
         this.recalculateAllScores();
       });
 
@@ -119,6 +120,10 @@ export class AddGameDialogComponent implements OnInit {
       });
 
       this.extendedArray.valueChanges.subscribe(() => {
+        this.recalculateAllScores();
+      });
+
+      this.remainingTilesArray.valueChanges.subscribe(() => {
         this.recalculateAllScores();
       });
 
@@ -134,26 +139,25 @@ export class AddGameDialogComponent implements OnInit {
           if (!checked) {
             const payersArr = ctrl.get('penaltyPayers') as FormArray;
             payersArr.controls.forEach((payerCtrl: AbstractControl) => {
-              (payerCtrl as FormGroup).patchValue({ selected: false, amount: null }, { emitEvent: false });
+              payerCtrl.patchValue({ selected: false, amount: null }, { emitEvent: false });
             });
             this.recalculateAllScores();
           }
         });
       });
+
+      // Initial calculation
+      this.recalculateAllScores();
     });
   }
 
-  private updateWinnerInput(): void {
-    const winnerId = this.form.value.winner;
-    if (winnerId === null || winnerId === undefined) return;
-    this.gameState.players.forEach(player => {
-      console.log(`Updating control for player ${player.id}, winnerId: ${winnerId}`);
-      
-      const control = this.losersForm.get(player.id.toString());
-      if (player.id === winnerId) {
-        control?.disable();
+  private updateWinnerInput(winnerId: number): void {
+    this.remainingTilesArray.controls.forEach((ctrl, idx) => {
+      ctrl.setValue(0, { emitEvent: false }); 
+      if (this.gameState.players[idx].id === winnerId) {
+        ctrl.disable({ emitEvent: false });
       } else {
-        control?.enable();
+        ctrl.enable({ emitEvent: false });
       }
     });
   }
@@ -161,14 +165,8 @@ export class AddGameDialogComponent implements OnInit {
   private recalculateAllScores(): void {
     if (!this.gameState) return;
     const n = this.nPlayers;
-    // Start with base scores (user input)
-    let scores = this.gameState.players.map((p, idx) => {
-      const ctrl = this.losersForm.get(p.id.toString());
-      return Number(ctrl?.value) || 0;
-    });
-
     // Reset all scores to 0 before applying extended logic
-    scores = scores.map(() => 0);
+    let scores = this.gameState.players.map(() => 0);
 
     // Apply all common points and penalty points
     this.extendedArray.controls.forEach((ctrl, idx) => {
@@ -209,13 +207,24 @@ export class AddGameDialogComponent implements OnInit {
       }
     });
 
-    // Update the form controls with the calculated scores
-    this.gameState.players.forEach((p, idx) => {
-      const ctrl = this.losersForm.get(p.id.toString());
-      if (ctrl && ctrl.value !== scores[idx]) {
-        ctrl.setValue(scores[idx], { emitEvent: false });
-      }
+    // Add remaining tiles to get the final total score
+    this.totalPoints = scores.map((score, idx) => {
+      const tiles = Number(this.remainingTilesArray.at(idx).value) || 0;
+      return score - tiles;
     });
+
+    // Update point of winner is total point of remaining tiles loser
+    const winnerId = this.form.value.winner;
+    if (winnerId !== null && winnerId !== undefined) {
+      const winnerIndex = this.gameState.players.findIndex(p => p.id === winnerId);
+      if (winnerIndex !== -1) {
+        this.totalPoints[winnerIndex] += this.remainingTilesArray.value.reduce((acc: number, cur: number) => acc + (Number(cur) || 0), 0);
+      }
+    }    
+  }
+
+  getPenaltyPayersFormArray(i: number): FormArray {
+    return (this.extendedArray.at(i).get('penaltyPayers') as FormArray);
   }
 
   save(): void {
@@ -224,8 +233,8 @@ export class AddGameDialogComponent implements OnInit {
       return;
     }
 
-    const losersGroup = this.losersForm.getRawValue();
-    const scores = this.gameState.players.map(p => Number(losersGroup[p.id]) || 0);
+    // Use the totalPoints array for saving
+    const scores = this.totalPoints;
 
     // Validation: sum must be zero
     const sum = scores.reduce((acc, cur) => acc + cur, 0);

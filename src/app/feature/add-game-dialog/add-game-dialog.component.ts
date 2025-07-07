@@ -38,6 +38,9 @@ export class AddGameDialogComponent implements OnInit {
   gameState!: GameState;
   totalPoints: number[] = [];
 
+  // This array will be used to control the display order in the template
+  sortedPlayerIndexes: number[] = [];
+
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
   }
@@ -91,9 +94,7 @@ export class AddGameDialogComponent implements OnInit {
         );
         (this.form.get('extended') as FormArray).push(
           this.fb.group({
-            hasCommon: [false],
             commonPoints: [null],
-            hasPenalty: [false],
             penaltyPayers: this.fb.array(
               state.players.map((p, j) =>
                 this.fb.group({
@@ -110,8 +111,12 @@ export class AddGameDialogComponent implements OnInit {
         );
       });
 
+      // Default order: as in gameState.players
+      this.sortedPlayerIndexes = state.players.map((_, idx) => idx);
+
       this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
         this.updateWinnerInput(winnerId);
+        this.sortPlayersByWinner(winnerId);
         this.recalculateAllScores();
       });
 
@@ -125,25 +130,6 @@ export class AddGameDialogComponent implements OnInit {
 
       this.remainingTilesArray.valueChanges.subscribe(() => {
         this.recalculateAllScores();
-      });
-
-      // Clear extended fields when checkboxes are unchecked
-      this.extendedArray.controls.forEach((ctrl, idx) => {
-        ctrl.get('hasCommon')?.valueChanges.subscribe((checked: boolean) => {
-          if (!checked) {
-            ctrl.patchValue({ commonPoints: null }, { emitEvent: false });
-            this.recalculateAllScores();
-          }
-        });
-        ctrl.get('hasPenalty')?.valueChanges.subscribe((checked: boolean) => {
-          if (!checked) {
-            const payersArr = ctrl.get('penaltyPayers') as FormArray;
-            payersArr.controls.forEach((payerCtrl: AbstractControl) => {
-              payerCtrl.patchValue({ selected: false, amount: null }, { emitEvent: false });
-            });
-            this.recalculateAllScores();
-          }
-        });
       });
 
       // Initial calculation
@@ -162,6 +148,21 @@ export class AddGameDialogComponent implements OnInit {
     });
   }
 
+  private sortPlayersByWinner(winnerId: number): void {
+    if (!this.gameState) return;
+    const winnerIdx = this.gameState.players.findIndex(p => p.id === winnerId);
+    if (winnerIdx === -1) {
+      // fallback to default order
+      this.sortedPlayerIndexes = this.gameState.players.map((_, idx) => idx);
+      return;
+    }
+    // Winner first, then the rest in original order
+    this.sortedPlayerIndexes = [
+      winnerIdx,
+      ...this.gameState.players.map((_, idx) => idx).filter(idx => idx !== winnerIdx)
+    ];
+  }
+
   private recalculateAllScores(): void {
     if (!this.gameState) return;
     const n = this.nPlayers;
@@ -170,41 +171,35 @@ export class AddGameDialogComponent implements OnInit {
 
     // Apply all common points and penalty points
     this.extendedArray.controls.forEach((ctrl, idx) => {
-      // Common Points
-      if (ctrl.get('hasCommon')?.value) {
-        const common = Number(ctrl.get('commonPoints')?.value);
-        if (!isNaN(common) && common > 0) {
-          // The current player gains common * (n-1)
-          scores[idx] += common * (n - 1);
-          // All other players lose common
-          this.gameState.players.forEach((p, j) => {
-            if (j !== idx) {
-              scores[j] -= common;
-            }
-          });
-        }
-      }
-      // Penalty Points
-      if (ctrl.get('hasPenalty')?.value) {
-        const receiverIdx = idx;
-        const payersArr = ctrl.get('penaltyPayers') as FormArray;
-        let totalPenalty = 0;
-        payersArr.controls.forEach((payerCtrl: AbstractControl, payerIdx: number) => {
-          const selected = payerCtrl.get('selected')?.value;
-          const amount = Number(payerCtrl.get('amount')?.value);
-          if (
-            selected &&
-            !isNaN(amount) && amount > 0 &&
-            payerIdx !== receiverIdx // cannot pay to self
-          ) {
-            // Each payer loses their amount * (n-1)
-            scores[payerIdx] -= amount * (n - 1);
-            totalPenalty += amount * (n - 1);
+      // Common Points (always visible, only apply if value entered)
+      const common = Number(ctrl.get('commonPoints')?.value);
+      if (!isNaN(common) && common > 0) {
+        // The current player gains common * (n-1)
+        scores[idx] += common * (n - 1);
+        // All other players lose common
+        this.gameState.players.forEach((p, j) => {
+          if (j !== idx) {
+            scores[j] -= common;
           }
         });
-        // Receiver gains sum of all penalty points paid
-        scores[receiverIdx] += totalPenalty;
       }
+      // Penalty Points (always visible, only apply if selected and amount entered)
+      const receiverIdx = idx;
+      const payersArr = ctrl.get('penaltyPayers') as FormArray;
+      let totalPenalty = 0;
+      payersArr.controls.forEach((payerCtrl: AbstractControl, payerIdx: number) => {
+        const amount = Number(payerCtrl.get('amount')?.value);
+        if (
+          !isNaN(amount) && amount > 0 &&
+          payerIdx !== receiverIdx // cannot pay to self
+        ) {
+          // Each payer loses their amount * (n-1)
+          scores[payerIdx] -= amount * (n - 1);
+          totalPenalty += amount * (n - 1);
+        }
+      });
+      // Receiver gains sum of all penalty points paid
+      scores[receiverIdx] += totalPenalty;
     });
 
     // Add remaining tiles to get the final total score

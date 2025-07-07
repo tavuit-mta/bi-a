@@ -8,7 +8,69 @@ mat-radio-group {
   margin-top: 16px;
 }
 
-.loser-input {
-  width: 100%;
+.player-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 12px;
+}
+
+.loser-input {
+  width: 180px;
+  min-width: 120px;
+  margin-bottom: 0;
+}
+
+.extended-per-player {
+  flex: 1 1 0;
+  min-width: 220px;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.extended-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.extended-input {
+  min-width: 120px;
+  flex: 1 1 0;
+}
+
+.penalty-receiver-label {
+  margin-top: 8px;
+
+  .mat-chip {
+    font-size: 13px;
+    background: #e3f2fd;
+    color: #1976d2;
+  }
+}
+
+.player-container {
+  border-bottom: 1px solid;
+  margin-bottom: 24px;
+  background-color: #e8e8e8;
+}
+
+@media (max-width: 600px) {
+  .player-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .loser-input,
+  .extended-per-player,
+  .extended-input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
 }

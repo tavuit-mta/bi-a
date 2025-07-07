@@ -1,6 +1,6 @@
 // Getter to return losers as FormGroup for template type safety
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule, FormsModule, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule, FormsModule, FormArray, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 import { GameService } from '../../core/services/game.service';
@@ -13,6 +13,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+
+interface PenaltyPayer {
+  id: number;
+  selected: boolean;
+  amount: number | null;
+}
 
 @Component({
   standalone: true,
@@ -53,6 +59,14 @@ export class AddGameDialogComponent implements OnInit {
     return this.extendedArray.at(i) as FormGroup;
   }
 
+  getPenaltyPayersFormArray(i: number): FormArray {
+    return (this.extendedArray.at(i).get('penaltyPayers') as FormArray);
+  }
+
+  getFormControl(control: AbstractControl, type: 'amount' | 'selected'): FormControl {
+    return control.get(type) as FormControl;
+  }
+
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AddGameDialogComponent>,
@@ -70,24 +84,33 @@ export class AddGameDialogComponent implements OnInit {
       });
 
       // Add controls for each player
-      state.players.forEach(player => {
+      state.players.forEach((player, idx) => {
         (this.form.get('losers') as FormGroup).addControl(
           player.id.toString(),
           new FormControl({ value: 0, disabled: false })
+        );
+        // Penalty payers: one FormGroup per other player
+        const penaltyPayersArray = this.fb.array(
+          state.players.map((p, j) =>
+            this.fb.group({
+              id: p.id,
+              selected: [false],
+              amount: [null]
+            })
+          )
         );
         (this.form.get('extended') as FormArray).push(
           this.fb.group({
             hasCommon: [false],
             commonPoints: [null],
             hasPenalty: [false],
-            penaltyPayers: [[]], // array of player ids
-            penaltyPoints: [null]
+            penaltyPayers: penaltyPayersArray
           })
         );
       });
 
       this.form.get('winner')!.valueChanges.subscribe(() => {
-        this.updateWinnerInput();
+        // this.updateWinnerInput();
         this.recalculateAllScores();
       });
 
@@ -109,7 +132,10 @@ export class AddGameDialogComponent implements OnInit {
         });
         ctrl.get('hasPenalty')?.valueChanges.subscribe((checked: boolean) => {
           if (!checked) {
-            ctrl.patchValue({ penaltyPayers: [], penaltyPoints: null }, { emitEvent: false });
+            const payersArr = ctrl.get('penaltyPayers') as FormArray;
+            payersArr.controls.forEach((payerCtrl: AbstractControl) => {
+              (payerCtrl as FormGroup).patchValue({ selected: false, amount: null }, { emitEvent: false });
+            });
             this.recalculateAllScores();
           }
         });
@@ -121,11 +147,13 @@ export class AddGameDialogComponent implements OnInit {
     const winnerId = this.form.value.winner;
     if (winnerId === null || winnerId === undefined) return;
     this.gameState.players.forEach(player => {
+      console.log(`Updating control for player ${player.id}, winnerId: ${winnerId}`);
+      
       const control = this.losersForm.get(player.id.toString());
       if (player.id === winnerId) {
-        control?.disable({ emitEvent: false });
+        control?.disable();
       } else {
-        control?.enable({ emitEvent: false });
+        control?.enable();
       }
     });
   }
@@ -161,22 +189,23 @@ export class AddGameDialogComponent implements OnInit {
       // Penalty Points
       if (ctrl.get('hasPenalty')?.value) {
         const receiverIdx = idx;
-        const payers: number[] = ctrl.get('penaltyPayers')?.value || [];
-        const penalty = Number(ctrl.get('penaltyPoints')?.value);
-        if (
-          Array.isArray(payers) && payers.length > 0 &&
-          !isNaN(penalty) && penalty > 0
-        ) {
-          // Each payer loses penalty * (n-1)
-          // Receiver gains penalty * (number of payers)
-          payers.forEach(payerId => {
-            const payerIdx = this.gameState.players.findIndex(p => p.id === payerId);
-            if (payerIdx !== -1) {
-              scores[payerIdx] -= penalty * (n - 1);
-            }
-          });
-          scores[receiverIdx] += penalty * (n - 1) * payers.length;
-        }
+        const payersArr = ctrl.get('penaltyPayers') as FormArray;
+        let totalPenalty = 0;
+        payersArr.controls.forEach((payerCtrl: AbstractControl, payerIdx: number) => {
+          const selected = payerCtrl.get('selected')?.value;
+          const amount = Number(payerCtrl.get('amount')?.value);
+          if (
+            selected &&
+            !isNaN(amount) && amount > 0 &&
+            payerIdx !== receiverIdx // cannot pay to self
+          ) {
+            // Each payer loses their amount * (n-1)
+            scores[payerIdx] -= amount * (n - 1);
+            totalPenalty += amount * (n - 1);
+          }
+        });
+        // Receiver gains sum of all penalty points paid
+        scores[receiverIdx] += totalPenalty;
       }
     });
 

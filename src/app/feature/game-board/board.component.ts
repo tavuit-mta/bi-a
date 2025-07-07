@@ -11,6 +11,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import html2canvas from 'html2canvas';
+import { Overlay } from '@angular/cdk/overlay';
 
 @Component({
   standalone: true,
@@ -32,7 +33,8 @@ export class BoardComponent implements OnInit, OnDestroy {
     private gameService: GameService,
     private dialog: MatDialog,
     private router: Router,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private overlay: Overlay
   ) {}
 
   ngOnInit(): void {
@@ -45,8 +47,12 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   openAddGameDialog(): void {
+    document.getElementById('board-container')?.style.setProperty('position', 'fixed', 'important');
     this.dialog.open(AddGameDialogComponent, {
-      width: '400px'
+      width: '400px',
+    });
+    this.dialog.afterAllClosed.subscribe(() => {
+      document.getElementById('board-container')?.style.removeProperty('position');
     });
   }
 

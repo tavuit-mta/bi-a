@@ -1,0 +1,19 @@
+.setup-container {
+  padding: 16px;
+}
+
+.player-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.player-input {
+  flex: 1;
+}
+
+.action-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

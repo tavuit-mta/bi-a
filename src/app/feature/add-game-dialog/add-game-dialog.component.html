@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>Thêm Ván Đấu</h2>
+<mat-dialog-content [formGroup]="form">
+  <p><strong>Chọn người thắng:</strong></p>
+  <mat-radio-group formControlName="winner">
+    <mat-radio-button
+      *ngFor="let player of gameState?.players"
+      [value]="player.id"
+    >
+      {{ player.name }}
+    </mat-radio-button>
+  </mat-radio-group>
+
+  <ng-container *ngIf="form.value?.winner !== null && form.value?.winner !== undefined">
+    <form [formGroup]="losersForm">
+      <p class="loser-title"><strong>Nhập điểm:</strong></p>
+      <div *ngFor="let player of gameState?.players">
+        <ng-container *ngIf="form.value?.winner !== player.id">
+          <mat-form-field appearance="outline" class="loser-input">
+            <mat-label>{{ player.name }}</mat-label>
+            <input
+              matInput
+              type="number"
+              [formControlName]="player.id"
+            />
+          </mat-form-field>
+        </ng-container>
+      </div>
+    </form>
+  </ng-container>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Hủy</button>
+  <button mat-raised-button color="primary" (click)="save()">Lưu</button>
+</mat-dialog-actions>

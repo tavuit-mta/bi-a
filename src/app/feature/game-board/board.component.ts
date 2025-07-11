@@ -17,6 +17,7 @@ import html2canvas from 'html2canvas';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { ModalMode } from '../../models/game-state.model';
 
 @Component({
   standalone: true,
@@ -77,7 +78,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.dialog.open(AddGameDialogComponent, {
       width: '400px',
       disableClose: true,
-      data: { mode: 'add' }
+      data: { mode: ModalMode.Add }
     });
   }
 
@@ -141,7 +142,7 @@ export class BoardComponent implements OnInit, OnDestroy {
       width: '400px',
       disableClose: true,
       data: {
-        mode: 'edit',
+        mode: ModalMode.Edit,
         result: result,
         rowIndex: rowIndex,
         players: playersForGame
@@ -153,6 +154,19 @@ export class BoardComponent implements OnInit, OnDestroy {
     const confirmed = confirm('Bạn có chắc chắn muốn xóa ván đấu này?');
     if (!confirmed) return;
     this.gameService.deleteGameResult(rowIndex);
+  }
+
+  viewGame(result: GameResult, rowIndex: number): void {
+    this.dialog.open(AddGameDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      data: {
+        mode: ModalMode.View,
+        result: result,
+        rowIndex: rowIndex,
+        players: result.players || this.gameState.players.slice(0, result.nPlayers)
+      }
+    });
   }
 
   endGame(): void {

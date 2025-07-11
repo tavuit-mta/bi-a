@@ -57,7 +57,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Hủy</button>
-  <button mat-raised-button color="primary" (click)="save()">
+  <button *ngIf="[ModelMode.Add, ModelMode.Edit].includes(modelMode)" mat-raised-button color="primary" (click)="save()">
     {{ isEditMode ? 'Cập nhật' : 'Lưu' }}
   </button>
 </mat-dialog-actions>

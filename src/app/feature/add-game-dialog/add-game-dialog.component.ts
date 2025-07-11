@@ -3,7 +3,7 @@ import { Component, OnInit, Inject, signal, Signal, viewChild, ChangeDetectorRef
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { GameService } from '../../core/services/game.service';
-import { GameState } from '../../models/game-state.model';
+import { GameState, ModalMode } from '../../models/game-state.model';
 import { Player } from '../../models/player.model';
 import { GameResult, PenaltyDetail } from '../../models/game-result.model';
 import { CommonModule } from '@angular/common';
@@ -45,7 +45,10 @@ export class AddGameDialogComponent implements OnInit {
   players: Player[] = [];
   isEditMode = false;
   editRowIndex: number | null = null;
-  panelOpenState = signal(0);
+  panelOpenState = signal(-1);
+  accordion: Signal<MatAccordion> = viewChild.required(MatAccordion);
+  modelMode: ModalMode = ModalMode.Add; // Default to Add mode
+  ModelMode = ModalMode;
 
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
@@ -84,7 +87,8 @@ export class AddGameDialogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.data && this.data.mode === 'edit' && this.data.result && this.data.players) {
+    this.modelMode = this.data.mode;
+    if (this.data.mode === ModalMode.Edit || this.data.mode === ModalMode.View) {
       this.isEditMode = true;
       this.players = this.data.players.map((p: Player) => ({ ...p }));
       this.editRowIndex = this.data.rowIndex;
@@ -94,6 +98,10 @@ export class AddGameDialogComponent implements OnInit {
         this.players = state.players.map(p => ({ ...p }));
         this.rebuildForm();
       });
+    }
+
+    if (this.data.mode === ModalMode.View) {
+      this.form.disable();
     }
   }
 
@@ -222,7 +230,9 @@ export class AddGameDialogComponent implements OnInit {
       ...this.players.map((_, idx) => idx).filter(idx => idx !== winnerIdx)
     ];
 
-    this.panelOpenState.set(this.sortedPlayerIndexes[0]); // Open the winner's panel by default
+    if (this.data?.mode === ModalMode.Add) {
+      this.panelOpenState.set(this.sortedPlayerIndexes[0]); 
+    }
   }
 
   private recalculateAllScores(): void {

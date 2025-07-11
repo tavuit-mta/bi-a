@@ -1,7 +1,8 @@
-mat-radio-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 16px;
+::ng-deep .mat-mdc-dialog-content {
+  padding-top: 16px !important;
+}
+.full-width {
+  width: 100%;
 }
 
 .loser-title {

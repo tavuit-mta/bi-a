@@ -1,14 +1,15 @@
 <h2 mat-dialog-title>
   {{ isEditMode ? 'Sửa Ván Đấu' : 'Thêm Ván Đấu' }}
 </h2>
-<mat-dialog-content [formGroup]="form">
-  <p><strong>Chọn người thắng:</strong></p>
-  <mat-radio-group formControlName="winner">
-    <mat-radio-button *ngFor="let player of players" [value]="player.id">
-      {{ player.name }}
-    </mat-radio-button>
-  </mat-radio-group>
-
+<mat-dialog-content [formGroup]="form" class="add-game-dialog-content">
+  <mat-form-field class="full-width" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Chọn người thắng:</mat-label>
+    <mat-select formControlName="winner">
+      @for (player of players; track player) {
+        <mat-option [value]="player.id">{{player.name}}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
   <ng-container *ngIf="form.value?.winner !== null && form.value?.winner !== undefined">
     <form [formGroup]="losersForm">
       <p class="loser-title"><strong>Nhập điểm cho từng người chơi:</strong></p>
@@ -37,7 +38,7 @@
               <div class="extended-row">
                 <div class="penalty-payers-list">
                   <div *ngFor="let payerCtrl of getPenaltyPayersFormArray(idx).controls; let j = index">
-                    <mat-form-field appearance="outline" class="penalty-amount-input">
+                    <mat-form-field appearance="outline" class="penalty-amount-input" *ngIf="idx !== j">
                       <mat-label>Điểm {{ players[j].name }} đền</mat-label>
                       <input matInput type="number" [formControl]="penaltyControl(payerCtrl, 'amount')" />
                     </mat-form-field>

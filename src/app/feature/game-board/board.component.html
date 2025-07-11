@@ -55,16 +55,16 @@
     </mat-card-content>
 
     <mat-card-actions class="action-row">
-      <button mat-raised-button color="primary" class="action-btn left" (click)="openAddGameDialog()">
+      <button mat-raised-button color="primary" class="action-btn" (click)="openAddGameDialog()">
         Thêm Ván Đấu
       </button>
-      <button mat-raised-button color="warn" class="action-btn right" (click)="endGame()">
+      <button mat-raised-button color="warn" class="action-btn" (click)="endGame()">
         Kết Thúc & Xóa Dữ Liệu
       </button>
-      <button mat-stroked-button color="accent" class="action-btn export" (click)="exportTableAsPng()">
+      <button mat-raised-button color="accent" class="action-btn" (click)="exportTableAsPng()">
         Export as PNG
       </button>
-      <button mat-stroked-button color="primary" class="action-btn add-player-input" (click)="showAddPlayer()">
+      <button mat-raised-button color="primary" class="action-btn" (click)="showAddPlayer()">
         Thêm người chơi
       </button>
     </mat-card-actions>

@@ -88,6 +88,10 @@
   .add-player-input {
     flex: 1 1 auto;
   }
+
+  .add-player-actions {
+    display: flex;
+  }
 }
 
 @media (max-width: 600px) {

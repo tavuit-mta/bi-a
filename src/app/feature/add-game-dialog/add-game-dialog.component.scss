@@ -13,13 +13,13 @@ mat-radio-group {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 24px;
-  padding: 8px;
+  // margin-bottom: 24px;
+  // padding: 8px;
 
-  border: 1px solid;
-  border-radius: 8px;
+  // border: 1px solid;
+  // border-radius: 8px;
   
-  background-color: #E5E5E5;
+  // background-color: #E5E5E5;
 }
 
 .tiles-input,
@@ -58,6 +58,10 @@ mat-radio-group {
   gap: 4px;
 
   width: 100%;
+}
+
+.player-panel {
+  margin: 16px 0;
 }
 
 @media (max-width: 600px) {

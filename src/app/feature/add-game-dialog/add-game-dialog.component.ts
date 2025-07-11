@@ -1,5 +1,5 @@
 // Getter to return losers as FormGroup for template type safety
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, signal, Signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { GameService } from '../../core/services/game.service';
@@ -14,6 +14,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatExpansionModule } from '@angular/material/expansion';
+
 
 @Component({
   standalone: true,
@@ -31,7 +33,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatInputModule,
     MatSelectModule,
     MatChipsModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatExpansionModule
   ]
 })
 export class AddGameDialogComponent implements OnInit {
@@ -42,6 +45,7 @@ export class AddGameDialogComponent implements OnInit {
   players: Player[] = [];
   isEditMode = false;
   editRowIndex: number | null = null;
+  panelOpenState: any = {};
 
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
@@ -76,7 +80,11 @@ export class AddGameDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<AddGameDialogComponent>,
     private gameService: GameService,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+  ) {
+    this.players.forEach((player, idx) => {
+      this.panelOpenState[player.id] = signal(false);
+    })
+  }
 
   ngOnInit(): void {
     if (this.data && this.data.mode === 'edit' && this.data.result && this.data.players) {
@@ -268,6 +276,9 @@ export class AddGameDialogComponent implements OnInit {
   }
 
   save(): void {
+    if (!confirm('Bạn chắc chắn về kết quả vừa nhâp?')) {
+      return
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -320,6 +331,10 @@ export class AddGameDialogComponent implements OnInit {
       this.gameService.addGameResult(result);
     }
     this.dialogRef.close();
+  }
+
+  togglePanel(idx: number, value: boolean): void {
+    this.panelOpenState[idx].set(value);
   }
 
   cancel(): void {

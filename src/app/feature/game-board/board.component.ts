@@ -69,6 +69,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   openAddGameDialog(): void {
     this.dialog.open(AddGameDialogComponent, {
       width: '400px',
+      disableClose: true,
       data: { mode: 'add' }
     });
   }
@@ -131,6 +132,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     this.dialog.open(AddGameDialogComponent, {
       width: '400px',
+      disableClose: true,
       data: {
         mode: 'edit',
         result: result,

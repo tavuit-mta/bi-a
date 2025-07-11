@@ -11,4 +11,5 @@ export interface GameResult {
   scores: number[];         // Regular scores, order matches players array
   commonPoints: number[];   // Common point value per player (order matches players)
   penalties: PenaltyDetail[]; // Penalty point configuration for this game
+  remainingPoints: number[]; // Remaining points after penalties, order matches players array
 }

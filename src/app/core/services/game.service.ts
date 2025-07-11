@@ -145,7 +145,8 @@ export class GameService {
           winnerId: result.winnerId ?? null,
           scores: result.scores ?? [],
           commonPoints: result.commonPoints ?? [],
-          penalties: result.penalties ?? []
+          penalties: result.penalties ?? [],
+          remainingPoints: result.remainingPoints ?? []
         }));
         this._gameState$.next(data);
       } catch {

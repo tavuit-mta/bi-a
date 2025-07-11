@@ -162,6 +162,15 @@ export class AddGameDialogComponent implements OnInit {
           }
         });
       }
+
+      // Pre-fill remaining tiles
+      if (existingResult.remainingPoints) {
+        existingResult.remainingPoints.forEach((points, idx) => {
+          if (this.remainingTilesArray.at(idx)) {
+            this.remainingTilesArray.at(idx).setValue(points, { emitEvent: false });
+          }
+        });
+      }
     }
 
     this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
@@ -275,6 +284,9 @@ export class AddGameDialogComponent implements OnInit {
     const commonPoints: number[] = this.extendedArray.controls.map(ctrl =>
       Number(ctrl.get('commonPoints')?.value) || 0
     );
+    const remainingPoints: number[] = this.remainingTilesArray.controls.map(ctrl =>
+      Number(ctrl.value) || 0
+    );
 
     // Gather penalties
     const penalties: PenaltyDetail[] = [];
@@ -298,7 +310,8 @@ export class AddGameDialogComponent implements OnInit {
       winnerId: this.form.value.winner,
       scores,
       commonPoints,
-      penalties
+      penalties,
+      remainingPoints
     };
 
     if (this.isEditMode && this.editRowIndex !== null) {

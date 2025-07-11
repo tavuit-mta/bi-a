@@ -1,17 +1,17 @@
 // Getter to return losers as FormGroup for template type safety
 import { Component, OnInit, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule, FormsModule, FormArray, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatRadioModule } from '@angular/material/radio';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
-import { GameResult } from '../../models/game-result.model';
 import { Player } from '../../models/player.model';
+import { GameResult, PenaltyDetail } from '../../models/game-result.model';
 import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
@@ -86,7 +86,6 @@ export class AddGameDialogComponent implements OnInit {
       this.rebuildForm(this.data.result);
     } else {
       this.gameService.gameState$.subscribe(state => {
-        this.gameState = state;
         this.players = state.players.map(p => ({ ...p }));
         this.rebuildForm();
       });
@@ -128,25 +127,41 @@ export class AddGameDialogComponent implements OnInit {
     this.sortedPlayerIndexes = this.players.map((_, idx) => idx);
 
     if (existingResult) {
-      // Pre-fill scores and winner
-      // Winner: the player with the highest score (or the one with the sum of remaining tiles if that's the rule)
-      let winnerIdx = 0;
-      let maxScore = existingResult.scores[0];
-      for (let i = 1; i < existingResult.scores.length; i++) {
-        if (existingResult.scores[i] > maxScore) {
-          maxScore = existingResult.scores[i];
-          winnerIdx = i;
-        }
+      // Pre-fill winner
+      if (existingResult.winnerId !== undefined && existingResult.winnerId !== null) {
+        this.form.get('winner')?.setValue(existingResult.winnerId);
+        this.updateWinnerInput(existingResult.winnerId);
+        this.sortPlayersByWinner(existingResult.winnerId);
       }
-      const winnerId = this.players[winnerIdx]?.id;
-      this.form.get('winner')?.setValue(winnerId);
-
-      // Set remaining tiles and extended points if you store them in result (extend as needed)
-      // For now, just set the scores as remaining tiles for demo (customize as needed)
-      existingResult.scores.forEach((score, idx) => {
-        this.remainingForm(idx).setValue(0);
-        // You can extend this to set other fields if you store them in GameResult
-      });
+      // Pre-fill scores as remaining tiles (if you use this logic)
+      if (existingResult.scores) {
+        existingResult.scores.forEach((score, idx) => {
+          if (this.remainingTilesArray.at(idx)) {
+            this.remainingTilesArray.at(idx).setValue(0, { emitEvent: false });
+          }
+        });
+      }
+      // Pre-fill commonPoints
+      if (existingResult.commonPoints) {
+        existingResult.commonPoints.forEach((cp, idx) => {
+          if (this.extendedArray.at(idx)) {
+            this.extendedArray.at(idx).get('commonPoints')?.setValue(cp, { emitEvent: false });
+          }
+        });
+      }
+      // Pre-fill penalties
+      if (existingResult.penalties) {
+        existingResult.penalties.forEach(penalty => {
+          const receiverIdx = this.players.findIndex(p => p.id === penalty.receiverId);
+          if (receiverIdx !== -1) {
+            const penaltyPayersArr = this.getPenaltyPayersFormArray(receiverIdx);
+            const payerIdx = this.players.findIndex(p => p.id === penalty.payerId);
+            if (payerIdx !== -1) {
+              penaltyPayersArr.at(payerIdx).get('amount')?.setValue(penalty.amount, { emitEvent: false });
+            }
+          }
+        });
+      }
     }
 
     this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
@@ -256,8 +271,34 @@ export class AddGameDialogComponent implements OnInit {
       return;
     }
 
+    // Gather commonPoints
+    const commonPoints: number[] = this.extendedArray.controls.map(ctrl =>
+      Number(ctrl.get('commonPoints')?.value) || 0
+    );
+
+    // Gather penalties
+    const penalties: PenaltyDetail[] = [];
+    this.extendedArray.controls.forEach((ctrl, receiverIdx) => {
+      const payersArr = ctrl.get('penaltyPayers') as FormArray;
+      payersArr.controls.forEach((payerCtrl: AbstractControl, payerIdx: number) => {
+        const amount = Number(payerCtrl.get('amount')?.value);
+        if (!isNaN(amount) && amount > 0 && payerIdx !== receiverIdx) {
+          penalties.push({
+            payerId: this.players[payerIdx].id,
+            amount,
+            receiverId: this.players[receiverIdx].id
+          });
+        }
+      });
+    });
+
     const result: GameResult = {
-      scores
+      nPlayers: this.players.length,
+      players: this.players.map(p => ({ id: p.id, name: p.name })),
+      winnerId: this.form.value.winner,
+      scores,
+      commonPoints,
+      penalties
     };
 
     if (this.isEditMode && this.editRowIndex !== null) {

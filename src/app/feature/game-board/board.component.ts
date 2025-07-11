@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import html2canvas from 'html2canvas';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
@@ -124,9 +124,10 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   // --- Edit Game Feature ---
   editGame(result: GameResult, rowIndex: number): void {
-    // Find the players for this game (by length of scores array)
-    const n = result.scores.length;
-    const playersForGame = this.gameState.players.slice(0, n);
+    // Use the players array stored in the result for this game
+    const playersForGame = result.players && result.players.length > 0
+      ? result.players
+      : this.gameState.players.slice(0, result.nPlayers);
 
     this.dialog.open(AddGameDialogComponent, {
       width: '400px',
@@ -203,7 +204,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     if (this.gameState.results && this.gameState.results.length) {
       for (const result of this.gameState.results) {
-        // Ensure result.scores is padded for new players
+        // Only sum scores for players that match the main list
         for (let i = 0; i < numPlayers; i++) {
           totals[i] += result.scores[i] || 0;
         }

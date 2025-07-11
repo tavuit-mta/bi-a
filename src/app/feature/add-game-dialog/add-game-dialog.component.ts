@@ -1,5 +1,5 @@
 // Getter to return losers as FormGroup for template type safety
-import { Component, OnInit, Inject, signal, Signal } from '@angular/core';
+import { Component, OnInit, Inject, signal, Signal, viewChild, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { GameService } from '../../core/services/game.service';
@@ -14,7 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
 
 
 @Component({
@@ -45,7 +45,7 @@ export class AddGameDialogComponent implements OnInit {
   players: Player[] = [];
   isEditMode = false;
   editRowIndex: number | null = null;
-  panelOpenState: any = {};
+  panelOpenState = signal(0);
 
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
@@ -79,6 +79,7 @@ export class AddGameDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AddGameDialogComponent>,
     private gameService: GameService,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
@@ -220,6 +221,8 @@ export class AddGameDialogComponent implements OnInit {
       winnerIdx,
       ...this.players.map((_, idx) => idx).filter(idx => idx !== winnerIdx)
     ];
+
+    this.panelOpenState.set(this.sortedPlayerIndexes[0]); // Open the winner's panel by default
   }
 
   private recalculateAllScores(): void {
@@ -327,6 +330,10 @@ export class AddGameDialogComponent implements OnInit {
       this.gameService.addGameResult(result);
     }
     this.dialogRef.close();
+  }
+
+  togglePanel(index: number): void {
+    this.panelOpenState.set(index)
   }
 
   cancel(): void {

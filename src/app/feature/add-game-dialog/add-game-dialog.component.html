@@ -14,7 +14,8 @@
     <form [formGroup]="losersForm">
       <p class="loser-title"><strong>Nhập điểm cho từng người chơi:</strong></p>
       <div *ngFor="let idx of sortedPlayerIndexes" class="player-panel">
-        <mat-expansion-panel>
+        <mat-accordion>
+          <mat-expansion-panel [expanded]="panelOpenState() === idx" (opened)="togglePanel(idx)">
           <mat-expansion-panel-header>
             <mat-panel-title> {{ players[idx].name }} </mat-panel-title>
             <mat-panel-description>
@@ -48,6 +49,7 @@
             </div>
           </div>
         </mat-expansion-panel>
+        </mat-accordion>
       </div>
     </form>
   </ng-container>

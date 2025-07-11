@@ -37,6 +37,12 @@
     right: 2px;
     z-index: 2;
   }
+  .action-header, .action-cell {
+    min-width: 80px;
+    max-width: 80px;
+    width: 80px;
+    text-align: center;
+  }
 }
 
 .action-row {
@@ -93,6 +99,11 @@
       width: 110px;
       font-size: 14px;
       padding: 4px;
+    }
+    .action-header, .action-cell {
+      min-width: 60px;
+      max-width: 60px;
+      width: 60px;
     }
   }
   .action-row {

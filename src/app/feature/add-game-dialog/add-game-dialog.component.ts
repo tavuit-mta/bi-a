@@ -1,7 +1,7 @@
 // Getter to return losers as FormGroup for template type safety
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule, FormsModule, FormArray, AbstractControl } from '@angular/forms';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
@@ -40,6 +40,8 @@ export class AddGameDialogComponent implements OnInit {
   totalPoints: number[] = [];
   sortedPlayerIndexes: number[] = [];
   players: Player[] = [];
+  isEditMode = false;
+  editRowIndex: number | null = null;
 
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
@@ -72,18 +74,26 @@ export class AddGameDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AddGameDialogComponent>,
-    private gameService: GameService
+    private gameService: GameService,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
   ngOnInit(): void {
-    this.gameService.gameState$.subscribe(state => {
-      this.gameState = state;
-      this.players = state.players.map(p => ({ ...p }));
-      this.rebuildForm();
-    });
+    if (this.data && this.data.mode === 'edit' && this.data.result && this.data.players) {
+      this.isEditMode = true;
+      this.players = this.data.players.map((p: Player) => ({ ...p }));
+      this.editRowIndex = this.data.rowIndex;
+      this.rebuildForm(this.data.result);
+    } else {
+      this.gameService.gameState$.subscribe(state => {
+        this.gameState = state;
+        this.players = state.players.map(p => ({ ...p }));
+        this.rebuildForm();
+      });
+    }
   }
 
-  private rebuildForm(): void {
+  private rebuildForm(existingResult?: GameResult): void {
     this.form = this.fb.group({
       winner: [null, Validators.required],
       losers: this.fb.group({}),
@@ -116,6 +126,28 @@ export class AddGameDialogComponent implements OnInit {
     });
 
     this.sortedPlayerIndexes = this.players.map((_, idx) => idx);
+
+    if (existingResult) {
+      // Pre-fill scores and winner
+      // Winner: the player with the highest score (or the one with the sum of remaining tiles if that's the rule)
+      let winnerIdx = 0;
+      let maxScore = existingResult.scores[0];
+      for (let i = 1; i < existingResult.scores.length; i++) {
+        if (existingResult.scores[i] > maxScore) {
+          maxScore = existingResult.scores[i];
+          winnerIdx = i;
+        }
+      }
+      const winnerId = this.players[winnerIdx]?.id;
+      this.form.get('winner')?.setValue(winnerId);
+
+      // Set remaining tiles and extended points if you store them in result (extend as needed)
+      // For now, just set the scores as remaining tiles for demo (customize as needed)
+      existingResult.scores.forEach((score, idx) => {
+        this.remainingForm(idx).setValue(0);
+        // You can extend this to set other fields if you store them in GameResult
+      });
+    }
 
     this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
       this.updateWinnerInput(winnerId);
@@ -228,7 +260,11 @@ export class AddGameDialogComponent implements OnInit {
       scores
     };
 
-    this.gameService.addGameResult(result);
+    if (this.isEditMode && this.editRowIndex !== null) {
+      this.gameService.updateGameResult(this.editRowIndex, result);
+    } else {
+      this.gameService.addGameResult(result);
+    }
     this.dialogRef.close();
   }
 

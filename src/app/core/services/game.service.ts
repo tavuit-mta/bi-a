@@ -94,6 +94,18 @@ export class GameService {
     this.saveToStorage();
   }
 
+  updateGameResult(index: number, result: GameResult): void {
+    const current = this._gameState$.value;
+    const newResults = [...current.results];
+    newResults[index] = result;
+    const newState: GameState = {
+      ...current,
+      results: newResults
+    };
+    this._gameState$.next(newState);
+    this.saveToStorage();
+  }
+
   resetGame(): void {
     const newState: GameState = {
       players: [],

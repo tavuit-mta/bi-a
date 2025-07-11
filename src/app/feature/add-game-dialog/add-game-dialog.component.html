@@ -1,4 +1,6 @@
-<h2 mat-dialog-title>Thêm Ván Đấu</h2>
+<h2 mat-dialog-title>
+  {{ isEditMode ? 'Sửa Ván Đấu' : 'Thêm Ván Đấu' }}
+</h2>
 <mat-dialog-content [formGroup]="form">
   <p><strong>Chọn người thắng:</strong></p>
   <mat-radio-group formControlName="winner">
@@ -62,5 +64,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Hủy</button>
-  <button mat-raised-button color="primary" (click)="save()">Lưu</button>
+  <button mat-raised-button color="primary" (click)="save()">
+    {{ isEditMode ? 'Cập nhật' : 'Lưu' }}
+  </button>
 </mat-dialog-actions>

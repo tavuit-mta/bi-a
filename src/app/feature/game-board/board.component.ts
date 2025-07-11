@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
 import { Player } from '../../models/player.model';
+import { GameResult } from '../../models/game-result.model';
 import { AddGameDialogComponent } from '../add-game-dialog/add-game-dialog.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -60,7 +61,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.sub = this.gameService.gameState$.subscribe(state => {
       this.gameState = state;
       this.displayedColumns = state.players.map(p => p.name);
-      this.footerAndDisplayedColumns = ['sumLabel', ...this.displayedColumns];
+      this.footerAndDisplayedColumns = ['sumLabel', ...this.displayedColumns, 'actions'];
       this.calculateTotals();
     });
   }
@@ -68,6 +69,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   openAddGameDialog(): void {
     this.dialog.open(AddGameDialogComponent, {
       width: '400px',
+      data: { mode: 'add' }
     });
   }
 
@@ -118,6 +120,23 @@ export class BoardComponent implements OnInit, OnDestroy {
     const confirmed = confirm(`Bạn có chắc chắn muốn xóa người chơi "${player.name}"?`);
     if (!confirmed) return;
     this.gameService.removePlayer(player.id, index);
+  }
+
+  // --- Edit Game Feature ---
+  editGame(result: GameResult, rowIndex: number): void {
+    // Find the players for this game (by length of scores array)
+    const n = result.scores.length;
+    const playersForGame = this.gameState.players.slice(0, n);
+
+    this.dialog.open(AddGameDialogComponent, {
+      width: '400px',
+      data: {
+        mode: 'edit',
+        result: result,
+        rowIndex: rowIndex,
+        players: playersForGame
+      }
+    });
   }
 
   endGame(): void {

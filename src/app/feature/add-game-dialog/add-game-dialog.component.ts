@@ -80,11 +80,7 @@ export class AddGameDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<AddGameDialogComponent>,
     private gameService: GameService,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-    this.players.forEach((player, idx) => {
-      this.panelOpenState[player.id] = signal(false);
-    })
-  }
+  ) {}
 
   ngOnInit(): void {
     if (this.data && this.data.mode === 'edit' && this.data.result && this.data.players) {
@@ -331,10 +327,6 @@ export class AddGameDialogComponent implements OnInit {
       this.gameService.addGameResult(result);
     }
     this.dialogRef.close();
-  }
-
-  togglePanel(idx: number, value: boolean): void {
-    this.panelOpenState[idx].set(value);
   }
 
   cancel(): void {

@@ -43,13 +43,18 @@
               <button mat-icon-button color="primary" aria-label="Sửa ván đấu" (click)="editGame(element, rowIndex)">
                 <mat-icon>edit</mat-icon>
               </button>
+              <button mat-icon-button color="warn" aria-label="Xóa ván đấu" (click)="deleteGame(element, rowIndex)">
+                <mat-icon>delete</mat-icon>
+              </button>
             </td>
             <td mat-footer-cell *matFooterCellDef class="fixed-col total-row"></td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="footerAndDisplayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: footerAndDisplayedColumns"></tr>
-          <tr mat-footer-row *matFooterRowDef="footerAndDisplayedColumns" class="total-row"></tr>
+          <ng-container *ngIf="showTotalRow">
+            <tr mat-footer-row *matFooterRowDef="footerAndDisplayedColumns" class="total-row"></tr>
+          </ng-container>
         </table>
       </div>
     </mat-card-content>
@@ -67,6 +72,9 @@
       <button mat-raised-button color="primary" class="action-btn" (click)="showAddPlayer()">
         Thêm người chơi
       </button>
+      <!-- <button mat-stroked-button color="primary" class="action-btn" (click)="toggleTotalRow()">
+        {{ showTotalRow ? 'Ẩn tổng điểm' : 'Hiện tổng điểm' }}
+      </button> -->
     </mat-card-actions>
 
     <form *ngIf="showAddPlayerInput" class="add-player-form" (ngSubmit)="confirmAddPlayer()">

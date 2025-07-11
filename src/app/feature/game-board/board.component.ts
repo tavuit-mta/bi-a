@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
@@ -49,12 +49,14 @@ export class BoardComponent implements OnInit, OnDestroy {
   showAddPlayerInput = false;
   addPlayerName = '';
   addPlayerError = '';
+  showTotalRow = true;
 
   constructor(
     private gameService: GameService,
     private dialog: MatDialog,
     private router: Router,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -64,6 +66,11 @@ export class BoardComponent implements OnInit, OnDestroy {
       this.footerAndDisplayedColumns = ['sumLabel', ...this.displayedColumns, 'actions'];
       this.calculateTotals();
     });
+  }
+
+  toggleTotalRow(): void {
+    this.showTotalRow = !this.showTotalRow;
+    this.cdr.detectChanges(); // Ensure view updates immediately
   }
 
   openAddGameDialog(): void {
@@ -140,6 +147,12 @@ export class BoardComponent implements OnInit, OnDestroy {
         players: playersForGame
       }
     });
+  }
+
+  deleteGame(result: GameResult, rowIndex: number): void {
+    const confirmed = confirm('Bạn có chắc chắn muốn xóa ván đấu này?');
+    if (!confirmed) return;
+    this.gameService.deleteGameResult(rowIndex);
   }
 
   endGame(): void {

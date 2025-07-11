@@ -13,7 +13,7 @@
     <form [formGroup]="losersForm">
       <p class="loser-title"><strong>Nhập điểm cho từng người chơi:</strong></p>
       <div *ngFor="let idx of sortedPlayerIndexes" class="player-panel">
-        <mat-expansion-panel (opened)="togglePanel(idx, true)" (closed)="togglePanel(idx, false)">
+        <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title> {{ players[idx].name }} </mat-panel-title>
             <mat-panel-description>
@@ -37,7 +37,7 @@
               <div class="extended-row">
                 <div class="penalty-payers-list">
                   <div *ngFor="let payerCtrl of getPenaltyPayersFormArray(idx).controls; let j = index">
-                    <mat-form-field appearance="outline" class="penalty-amount-input" *ngIf="idx !== j">
+                    <mat-form-field appearance="outline" class="penalty-amount-input">
                       <mat-label>Điểm {{ players[j].name }} đền</mat-label>
                       <input matInput type="number" [formControl]="penaltyControl(payerCtrl, 'amount')" />
                     </mat-form-field>

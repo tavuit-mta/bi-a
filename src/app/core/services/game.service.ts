@@ -117,6 +117,18 @@ export class GameService {
     this.saveToStorage();
   }
 
+  deleteGameResult(index: number): void {
+    const current = this._gameState$.value;
+    const newResults = [...current.results];
+    newResults.splice(index, 1);
+    const newState: GameState = {
+      ...current,
+      results: newResults
+    };
+    this._gameState$.next(newState);
+    this.saveToStorage();
+  }
+
   resetGame(): void {
     const newState: GameState = {
       players: [],

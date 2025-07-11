@@ -157,6 +157,9 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   viewGame(result: GameResult, rowIndex: number): void {
+    const playersForGame = result.players && result.players.length > 0
+      ? result.players
+      : this.gameState.players.slice(0, result.nPlayers);
     this.dialog.open(AddGameDialogComponent, {
       width: '400px',
       disableClose: true,
@@ -164,7 +167,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         mode: ModalMode.View,
         result: result,
         rowIndex: rowIndex,
-        players: result.players || this.gameState.players.slice(0, result.nPlayers)
+        players: playersForGame
       }
     });
   }

@@ -142,7 +142,7 @@ export class BoardComponent implements OnInit, OnDestroy {
       width: '400px',
       disableClose: true,
       data: {
-        mode: ModalMode.Edit,
+        mode: ModalMode.View,
         result: result,
         rowIndex: rowIndex,
         players: playersForGame
@@ -154,22 +154,6 @@ export class BoardComponent implements OnInit, OnDestroy {
     const confirmed = confirm('Bạn có chắc chắn muốn xóa ván đấu này?');
     if (!confirmed) return;
     this.gameService.deleteGameResult(rowIndex);
-  }
-
-  viewGame(result: GameResult, rowIndex: number): void {
-    const playersForGame = result.players && result.players.length > 0
-      ? result.players
-      : this.gameState.players.slice(0, result.nPlayers);
-    this.dialog.open(AddGameDialogComponent, {
-      width: '400px',
-      disableClose: true,
-      data: {
-        mode: ModalMode.View,
-        result: result,
-        rowIndex: rowIndex,
-        players: playersForGame
-      }
-    });
   }
 
   endGame(): void {

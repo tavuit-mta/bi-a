@@ -1,5 +1,5 @@
 <h2 mat-dialog-title>
-  {{ isEditMode ? 'Sửa Ván Đấu' : 'Thêm Ván Đấu' }}
+  {{ isViewMode ? 'Sửa Ván Đấu' : 'Thêm Ván Đấu' }}
 </h2>
 <mat-dialog-content [formGroup]="form" class="add-game-dialog-content">
   <mat-form-field class="full-width" appearance="outline" subscriptSizing="dynamic">
@@ -57,7 +57,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Hủy</button>
-  <button *ngIf="[ModelMode.Add, ModelMode.Edit].includes(modelMode)" mat-raised-button color="primary" (click)="save()">
-    {{ isEditMode ? 'Cập nhật' : 'Lưu' }}
+  <button mat-raised-button color="primary" (click)="save()">
+    {{ isEditMode ? 'Lưu' : 'Cập nhật' }}
   </button>
 </mat-dialog-actions>

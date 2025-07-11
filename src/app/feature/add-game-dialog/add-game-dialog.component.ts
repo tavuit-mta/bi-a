@@ -43,6 +43,7 @@ export class AddGameDialogComponent implements OnInit {
   totalPoints: number[] = [];
   sortedPlayerIndexes: number[] = [];
   players: Player[] = [];
+  isViewMode = false;
   isEditMode = false;
   editRowIndex: number | null = null;
   panelOpenState = signal(-1);
@@ -88,20 +89,21 @@ export class AddGameDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.modelMode = this.data.mode;
-    if (this.data.mode === ModalMode.Edit || this.data.mode === ModalMode.View) {
-      this.isEditMode = true;
+    this.handleForm();
+  }
+
+  private handleForm(): void {
+    if (this.data.mode === ModalMode.View) {
+      this.isViewMode = true;
       this.players = this.data.players.map((p: Player) => ({ ...p }));
       this.editRowIndex = this.data.rowIndex;
       this.rebuildForm(this.data.result);
     } else {
+      this.isEditMode = true;
       this.gameService.gameState$.subscribe(state => {
         this.players = state.players.map(p => ({ ...p }));
         this.rebuildForm();
       });
-    }
-
-    if (this.data.mode === ModalMode.View) {
-      this.form.disable();
     }
   }
 
@@ -189,7 +191,7 @@ export class AddGameDialogComponent implements OnInit {
     this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
       this.updateWinnerInput(winnerId);
       this.sortPlayersByWinner(winnerId);
-      this.recalculateAllScores();
+      // this.recalculateAllScores();
     });
 
     this.losersForm.valueChanges.subscribe(() => {
@@ -205,6 +207,13 @@ export class AddGameDialogComponent implements OnInit {
     });
 
     this.recalculateAllScores();
+    if (this.modelMode === ModalMode.View) {
+      this.form.disable({ emitEvent: false });
+    }
+    if (this.modelMode === ModalMode.Edit) {
+      this.form.enable({ emitEvent: false });
+    }
+    this.cdr.detectChanges();
   }
 
   private updateWinnerInput(winnerId: number): void {
@@ -285,6 +294,14 @@ export class AddGameDialogComponent implements OnInit {
   }
 
   save(): void {
+    if (this.modelMode === ModalMode.View) {
+      this.modelMode = ModalMode.Edit;
+      this.isViewMode = false;
+      this.isEditMode = true;
+      this.cdr.detectChanges();
+      this.handleForm();
+      return;
+    }
     if (!confirm('Bạn chắc chắn về kết quả vừa nhâp?')) {
       return
     }

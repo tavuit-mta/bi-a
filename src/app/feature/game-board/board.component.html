@@ -24,7 +24,7 @@
               {{ player.name }}
             </th>
             <td mat-cell *matCellDef="let element" class="fixed-col">
-              {{ element.scores[i] }}
+              {{ element.scores[i] || 0 }}
             </td>
             <td mat-footer-cell *matFooterCellDef class="fixed-col total-row">
               <strong>{{ totalScores[i] }}</strong>
@@ -48,6 +48,21 @@
       <button mat-stroked-button color="accent" class="action-btn export" (click)="exportTableAsPng()">
         Export as PNG
       </button>
+      <button mat-stroked-button color="primary" class="action-btn add-player-input" (click)="showAddPlayer()">
+        Thêm người chơi
+      </button>
     </mat-card-actions>
+
+    <form *ngIf="showAddPlayerInput" class="add-player-form" (ngSubmit)="confirmAddPlayer()">
+        <mat-form-field appearance="outline" class="add-player-input" [subscriptSizing]="'dynamic'">
+          <mat-label>Tên người chơi mới</mat-label>
+          <input matInput [(ngModel)]="addPlayerName" name="addPlayerName" required [ngModelOptions]="{standalone: true}" />
+          <!-- <mat-error *ngIf="addPlayerError">{{ addPlayerError }}</mat-error> -->
+        </mat-form-field>
+        <div class="add-player-actions">
+          <button mat-raised-button color="primary" type="submit">Thêm</button>
+          <button mat-button type="button" (click)="cancelAddPlayer()">Hủy</button>
+        </div>
+      </form>
   </mat-card>
 </div>

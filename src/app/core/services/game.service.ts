@@ -35,6 +35,31 @@ export class GameService {
     this.saveToStorage();
   }
 
+  addPlayer(player: Player): void {
+    const current = this._gameState$.value;
+    const newPlayers = [...current.players, player];
+    this.setPlayers(newPlayers);
+  }
+
+  addPlayerToResults(player: Player): void {
+    const current = this._gameState$.value;
+    const numPlayers = current.players.length;
+    const newResults = (current.results || []).map(result => {
+      // Pad scores array to match new number of players
+      const scores = [...result.scores];
+      while (scores.length < numPlayers) {
+        scores.push(0);
+      }
+      return { ...result, scores };
+    });
+    const newState: GameState = {
+      ...current,
+      results: newResults
+    };
+    this._gameState$.next(newState);
+    this.saveToStorage();
+  }
+
   addGameResult(result: GameResult): void {
     const current = this._gameState$.value;
     const newState: GameState = {

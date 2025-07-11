@@ -35,10 +35,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0 0 0;
+  padding: 16px;
   width: 100%;
   gap: 16px;
-
+  
   .action-btn {
     flex: 1 1 0;
     max-width: 48%;
@@ -60,6 +60,19 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 8px;
+  }
+}
+
+.add-player-form {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 16px 16px 16px;
+
+  .add-player-input {
+    flex: 1 1 auto;
   }
 }
 

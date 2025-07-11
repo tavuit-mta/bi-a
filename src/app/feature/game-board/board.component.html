@@ -21,7 +21,10 @@
             [matColumnDef]="player.name"
           >
             <th mat-header-cell *matHeaderCellDef class="fixed-col">
-              {{ player.name }}
+              <span>{{ player.name }}</span>
+              <!-- <button mat-icon-button color="warn" aria-label="Xóa người chơi" (click)="removePlayer(player, i)" *ngIf="gameState.players.length > 2">
+                <mat-icon>delete</mat-icon>
+              </button> -->
             </th>
             <td mat-cell *matCellDef="let element" class="fixed-col">
               {{ element.scores[i] || 0 }}
@@ -39,16 +42,16 @@
     </mat-card-content>
 
     <mat-card-actions class="action-row">
-      <button mat-raised-button color="primary" class="action-btn left" (click)="openAddGameDialog()">
+      <button mat-raised-button color="primary" class="action-btn" (click)="openAddGameDialog()">
         Thêm Ván Đấu
       </button>
-      <button mat-raised-button color="warn" class="action-btn right" (click)="endGame()">
+      <button mat-raised-button color="warn" class="action-btn" (click)="endGame()">
         Kết Thúc & Xóa Dữ Liệu
       </button>
-      <button mat-stroked-button color="accent" class="action-btn export" (click)="exportTableAsPng()">
+      <button mat-raised-button color="accent" class="action-btn" (click)="exportTableAsPng()">
         Export as PNG
       </button>
-      <button mat-stroked-button color="primary" class="action-btn add-player-input" (click)="showAddPlayer()">
+      <button mat-raised-button color="primary" class="action-btn" (click)="showAddPlayer()">
         Thêm người chơi
       </button>
     </mat-card-actions>
@@ -57,7 +60,6 @@
         <mat-form-field appearance="outline" class="add-player-input" [subscriptSizing]="'dynamic'">
           <mat-label>Tên người chơi mới</mat-label>
           <input matInput [(ngModel)]="addPlayerName" name="addPlayerName" required [ngModelOptions]="{standalone: true}" />
-          <!-- <mat-error *ngIf="addPlayerError">{{ addPlayerError }}</mat-error> -->
         </mat-form-field>
         <div class="add-player-actions">
           <button mat-raised-button color="primary" type="submit">Thêm</button>

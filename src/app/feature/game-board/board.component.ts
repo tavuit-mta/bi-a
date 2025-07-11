@@ -9,6 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import html2canvas from 'html2canvas';
@@ -26,6 +27,7 @@ import { MatInputModule } from '@angular/material/input';
     MatTableModule, 
     MatButtonModule, 
     MatDialogModule, 
+    MatIconModule,
     CommonModule, 
     ReactiveFormsModule, 
     FormsModule, 
@@ -105,6 +107,17 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.showAddPlayerInput = false;
     this.addPlayerName = '';
     this.addPlayerError = '';
+  }
+
+  // --- Remove Player Feature ---
+  removePlayer(player: Player, index: number): void {
+    if (this.gameState.players.length <= 2) {
+      alert('Cần ít nhất 2 người chơi.');
+      return;
+    }
+    const confirmed = confirm(`Bạn có chắc chắn muốn xóa người chơi "${player.name}"?`);
+    if (!confirmed) return;
+    this.gameService.removePlayer(player.id, index);
   }
 
   endGame(): void {

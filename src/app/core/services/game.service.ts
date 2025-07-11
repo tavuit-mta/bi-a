@@ -60,6 +60,30 @@ export class GameService {
     this.saveToStorage();
   }
 
+  removePlayer(playerId: number, index: number): void {
+    const current = this._gameState$.value;
+    // Remove player from players array
+    const newPlayers = current.players.filter(p => p.id !== playerId);
+    // Remove the player's score from each result
+    const newResults = (current.results || []).map(result => {
+      const scores = [...result.scores];
+      scores.splice(index, 1);
+      // After removal, ensure sum is still zero (if not, adjust last player)
+      const sum = scores.reduce((a, b) => a + b, 0);
+      if (sum !== 0 && scores.length > 0) {
+        scores[scores.length - 1] -= sum;
+      }
+      return { ...result, scores };
+    });
+    const newState: GameState = {
+      ...current,
+      players: newPlayers,
+      results: newResults
+    };
+    this._gameState$.next(newState);
+    this.saveToStorage();
+  }
+
   addGameResult(result: GameResult): void {
     const current = this._gameState$.value;
     const newState: GameState = {

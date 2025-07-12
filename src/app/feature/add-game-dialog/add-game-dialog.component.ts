@@ -34,7 +34,7 @@ import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
     MatSelectModule,
     MatChipsModule,
     MatCheckboxModule,
-    MatExpansionModule
+    MatExpansionModule,
   ]
 })
 export class AddGameDialogComponent implements OnInit {

@@ -18,6 +18,8 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ModalMode } from '../../models/game-state.model';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Media, MediaSaveOptions } from '@capacitor-community/media';
 
 @Component({
   standalone: true,
@@ -25,14 +27,14 @@ import { ModalMode } from '../../models/game-state.model';
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
   imports: [
-    MatCardModule, 
-    MatTableModule, 
-    MatButtonModule, 
-    MatDialogModule, 
+    MatCardModule,
+    MatTableModule,
+    MatButtonModule,
+    MatDialogModule,
     MatIconModule,
-    CommonModule, 
-    ReactiveFormsModule, 
-    FormsModule, 
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
     MatFormFieldModule,
     MatInputModule
   ],
@@ -52,6 +54,8 @@ export class BoardComponent implements OnInit, OnDestroy {
   addPlayerError = '';
   showTotalRow = true;
 
+  album = 'BilliardScore'; // Default album name for saving images
+
   constructor(
     private gameService: GameService,
     private dialog: MatDialog,
@@ -64,7 +68,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.sub = this.gameService.gameState$.subscribe(state => {
       this.gameState = state;
       this.displayedColumns = state.players.map(p => p.name);
-      this.footerAndDisplayedColumns = ['sumLabel', ...this.displayedColumns, 'actions'];
+      this.footerAndDisplayedColumns = [...this.displayedColumns, 'sumLabel'];
       this.calculateTotals();
     });
   }
@@ -163,7 +167,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
   }
 
-  exportTableAsPng(): void {
+  async exportTableAsPngIonic(): Promise<void> {
     if (!this.tableWrapper) return;
     const tableWrapperEl = this.tableWrapper.nativeElement;
     const tableEl = tableWrapperEl.querySelector('table');
@@ -181,7 +185,17 @@ export class BoardComponent implements OnInit, OnDestroy {
     // Optionally, scroll to the left to ensure all content is visible
     tableWrapperEl.scrollLeft = 0;
 
-    // Wait for the browser to render the new layout
+    try {
+      if ((window as any).Capacitor?.isNativePlatform()) {
+        if (Filesystem.requestPermissions) {
+          await Filesystem.requestPermissions();
+        }
+      }
+    } catch (permErr) {
+      alert('Không có quyền truy cập bộ nhớ hoặc thư viện ảnh.');
+      return;
+    }
+
     setTimeout(() => {
       html2canvas(tableWrapperEl, {
         backgroundColor: null,
@@ -191,21 +205,34 @@ export class BoardComponent implements OnInit, OnDestroy {
         scrollY: 0,
         windowWidth: tableEl.scrollWidth,
         windowHeight: tableEl.scrollHeight
-      }).then(canvas => {
-        // Restore original styles
+      }).then(async canvas => {
         this.renderer.setStyle(tableWrapperEl, 'overflow', originalOverflow);
         this.renderer.setStyle(tableWrapperEl, 'width', originalWidth);
         tableWrapperEl.scrollLeft = originalScrollLeft;
 
-        const link = document.createElement('a');
-        link.download = 'billiard-scoreboard.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        const base64 = canvas.toDataURL('image/png').split(',')[1];
+        const fileName = `billiard-scoreboard-${Date.now()}.png`;
+
+        // Save to Filesystem (Documents directory)
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64,
+          directory: Directory.Cache
+        });
+
+        const mediaSaveOptions: MediaSaveOptions = {
+          path: savedFile.uri,
+        };
+
+        await Media.savePhoto(mediaSaveOptions);
+        alert('Ảnh đã được lưu vào thư viện!');
       }).catch(() => {
-        // Restore styles even if error
+
         this.renderer.setStyle(tableWrapperEl, 'overflow', originalOverflow);
         this.renderer.setStyle(tableWrapperEl, 'width', originalWidth);
         tableWrapperEl.scrollLeft = originalScrollLeft;
+        alert('Lưu ảnh thất bại!');
+
       });
     }, 100);
   }

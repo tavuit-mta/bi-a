@@ -5,7 +5,7 @@
 }
 
 ::ng-deep .board-content {
-  height: calc(100vh - 292px);
+  height: calc(100vh - 400px - 32px);
   overflow-y: scroll;
 }
 

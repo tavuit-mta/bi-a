@@ -4,15 +4,11 @@
   box-sizing: border-box;
 }
 
-::ng-deep .board-content {
-  height: calc(100vh - 400px - 32px);
-  overflow-y: scroll;
-}
-
 .table-scroll-wrapper {
   width: 100%;
   overflow-x: auto;
   position: relative;
+  height: calc(100vh - 400px - 32px);
 }
 
 .fixed-width-table {

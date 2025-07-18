@@ -80,3 +80,7 @@
     max-width: 100%;
   }
 }
+
+.mat-expansion-panel-header.is-error {
+  background-color: rgb(255 31 31 / 12%) !important;
+}

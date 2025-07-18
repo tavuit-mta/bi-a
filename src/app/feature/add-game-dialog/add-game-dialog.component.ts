@@ -393,6 +393,11 @@ export class AddGameDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
+  isError(index: number): boolean {
+    const form = this.remainingForm(index);
+    return form.invalid && (form.dirty || form.touched);
+  }
+
   togglePanel(index: number): void {
     this.panelOpenState.set(index)
   }

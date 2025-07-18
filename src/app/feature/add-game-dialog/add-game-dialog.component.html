@@ -16,7 +16,7 @@
       <div *ngFor="let idx of sortedPlayerIndexes" class="player-panel">
         <mat-accordion>
           <mat-expansion-panel [expanded]="panelOpenState() === idx" (opened)="togglePanel(idx)">
-          <mat-expansion-panel-header>
+          <mat-expansion-panel-header [ngClass]="{'is-error': isError(idx)}">
             <mat-panel-title> {{ players[idx].name }} </mat-panel-title>
             <mat-panel-description>
               {{ totalPoints[idx]}}
@@ -26,7 +26,7 @@
             <mat-form-field appearance="outline" class="tiles-input">
               <mat-label>Số lá còn lại</mat-label>
               <input matInput numberPattern type="number" [formControl]="remainingForm(idx)" pattern="[0-9]*"/>
-              <mat-error *ngIf="remainingForm(idx).hasError('required')">
+              <mat-error *ngIf="isError(idx)">
                 Vui lòng nhập số lá còn lại.
               </mat-error>
             </mat-form-field>

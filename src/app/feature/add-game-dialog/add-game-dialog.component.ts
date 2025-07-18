@@ -15,6 +15,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
+import { NumberPatternClearDirective } from '../../shared/number-pattern-clear.directive';
 
 
 @Component({
@@ -35,6 +36,7 @@ import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
     MatChipsModule,
     MatCheckboxModule,
     MatExpansionModule,
+    NumberPatternClearDirective
   ]
 })
 export class AddGameDialogComponent implements OnInit {
@@ -95,16 +97,28 @@ export class AddGameDialogComponent implements OnInit {
   private handleForm(): void {
     if (this.data.mode === ModalMode.View) {
       this.isViewMode = true;
-      this.players = this.data.players.map((p: Player) => ({ ...p }));
+      this.isEditMode = false;
       this.editRowIndex = this.data.rowIndex;
+      this.players = this.data.players.map((p: Player) => ({ ...p }));
       this.rebuildForm(this.data.result);
-    } else {
+    } 
+    
+    if (this.data.mode === ModalMode.Edit) {
       this.isEditMode = true;
-      this.gameService.gameState$.subscribe(state => {
+      this.isViewMode = false;
+      this.editRowIndex = this.data.rowIndex;
+      this.players = this.data.players.map((p: Player) => ({ ...p }));
+      this.rebuildForm(this.data.result);
+    }
+    
+    this.gameService.gameState$.subscribe(state => {
+      if (this.data.mode === ModalMode.Add) {
+        this.isEditMode = true;
+        this.isViewMode = false;
         this.players = state.players.map(p => ({ ...p }));
         this.rebuildForm();
-      });
-    }
+      }
+    });
   }
 
   private rebuildForm(existingResult?: GameResult): void {
@@ -140,19 +154,30 @@ export class AddGameDialogComponent implements OnInit {
     });
 
     this.sortedPlayerIndexes = this.players.map((_, idx) => idx);
+    
+    if (this.modelMode === ModalMode.View) {
+      this.form.disable({ emitEvent: false });
+    }
+    if (this.modelMode === ModalMode.Edit) {
+      this.form.enable({ emitEvent: false });
+    }
+
+    this.cdr.detectChanges();
 
     if (existingResult) {
       // Pre-fill winner
       if (existingResult.winnerId !== undefined && existingResult.winnerId !== null) {
         this.form.get('winner')?.setValue(existingResult.winnerId);
-        this.updateWinnerInput(existingResult.winnerId);
         this.sortPlayersByWinner(existingResult.winnerId);
       }
       // Pre-fill scores as remaining tiles (if you use this logic)
       if (existingResult.scores) {
         existingResult.scores.forEach((score, idx) => {
           if (this.remainingTilesArray.at(idx)) {
-            this.remainingTilesArray.at(idx).setValue(0, { emitEvent: false });
+            this.remainingTilesArray.at(idx).setValue(score, { emitEvent: false });
+          }
+          if (idx === existingResult.winnerId) {
+            this.remainingTilesArray.at(idx)!.disable({ emitEvent: false });
           }
         });
       }
@@ -187,11 +212,15 @@ export class AddGameDialogComponent implements OnInit {
         });
       }
     }
-
+    
     this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
+      this.form.reset({ winner: winnerId }, { emitEvent: false });
+      this.recalculateAllScores();
+      // Recalculate scores and update UI
+      this.cdr.detectChanges();
+      // Update winner input and sort players
       this.updateWinnerInput(winnerId);
       this.sortPlayersByWinner(winnerId);
-      // this.recalculateAllScores();
     });
 
     this.losersForm.valueChanges.subscribe(() => {
@@ -205,14 +234,7 @@ export class AddGameDialogComponent implements OnInit {
     this.remainingTilesArray.valueChanges.subscribe(() => {
       this.recalculateAllScores();
     });
-
     this.recalculateAllScores();
-    if (this.modelMode === ModalMode.View) {
-      this.form.disable({ emitEvent: false });
-    }
-    if (this.modelMode === ModalMode.Edit) {
-      this.form.enable({ emitEvent: false });
-    }
     this.cdr.detectChanges();
   }
 
@@ -241,6 +263,8 @@ export class AddGameDialogComponent implements OnInit {
 
     if (this.data?.mode === ModalMode.Add) {
       this.panelOpenState.set(this.sortedPlayerIndexes[0]); 
+    } else {
+      this.panelOpenState.set(-1);
     }
   }
 
@@ -351,9 +375,10 @@ export class AddGameDialogComponent implements OnInit {
       remainingPoints
     };
 
-    if (this.isEditMode && this.editRowIndex !== null) {
+    if (this.modelMode === ModalMode.Edit && this.editRowIndex !== null) {
       this.gameService.updateGameResult(this.editRowIndex, result);
-    } else {
+    } 
+    if (this.modelMode === ModalMode.Add) {
       this.gameService.addGameResult(result);
     }
     this.dialogRef.close();

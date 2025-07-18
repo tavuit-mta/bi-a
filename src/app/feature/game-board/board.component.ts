@@ -176,11 +176,13 @@ export class BoardComponent implements OnInit, OnDestroy {
     // Save original styles
     const originalOverflow = tableWrapperEl.style.overflow;
     const originalWidth = tableWrapperEl.style.width;
+    const originalHeight = tableWrapperEl.style.height;
     const originalScrollLeft = tableWrapperEl.scrollLeft;
 
     // Expand the scroll wrapper to fit the table for export
     this.renderer.setStyle(tableWrapperEl, 'overflow', 'visible');
     this.renderer.setStyle(tableWrapperEl, 'width', tableEl.scrollWidth + 'px');
+    this.renderer.setStyle(tableWrapperEl, 'height', tableEl.scrollHeight + 'px');
 
     // Optionally, scroll to the left to ensure all content is visible
     tableWrapperEl.scrollLeft = 0;
@@ -208,12 +210,12 @@ export class BoardComponent implements OnInit, OnDestroy {
       }).then(async canvas => {
         this.renderer.setStyle(tableWrapperEl, 'overflow', originalOverflow);
         this.renderer.setStyle(tableWrapperEl, 'width', originalWidth);
+        this.renderer.setStyle(tableWrapperEl, 'height', originalHeight);
         tableWrapperEl.scrollLeft = originalScrollLeft;
 
         const base64 = canvas.toDataURL('image/png').split(',')[1];
         const fileName = `billiard-scoreboard-${Date.now()}.png`;
 
-        // Save to Filesystem (Documents directory)
         const savedFile = await Filesystem.writeFile({
           path: fileName,
           data: base64,
@@ -230,9 +232,10 @@ export class BoardComponent implements OnInit, OnDestroy {
 
         this.renderer.setStyle(tableWrapperEl, 'overflow', originalOverflow);
         this.renderer.setStyle(tableWrapperEl, 'width', originalWidth);
+        this.renderer.setStyle(tableWrapperEl, 'height', originalHeight);
+
         tableWrapperEl.scrollLeft = originalScrollLeft;
         alert('Lưu ảnh thất bại!');
-
       });
     }, 100);
   }

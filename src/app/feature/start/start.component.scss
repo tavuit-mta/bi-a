@@ -3,4 +3,25 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  flex-direction: column;
+
+  gap: 24px;
+}
+
+.add-player-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-direction: column;
+  width: 100%;
+
+  .add-player-input {
+    width: 80%;
+  }
+
+  .add-player-actions {
+    display: flex;
+    gap: 8px;
+  }
 }

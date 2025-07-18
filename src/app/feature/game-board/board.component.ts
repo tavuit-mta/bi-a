@@ -20,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ModalMode } from '../../models/game-state.model';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Media, MediaSaveOptions } from '@capacitor-community/media';
+import { AppService } from '../../app.service';
 
 @Component({
   standalone: true,
@@ -55,16 +56,23 @@ export class BoardComponent implements OnInit, OnDestroy {
   showTotalRow = false; 
 
   album = 'BilliardScore'; // Default album name for saving images
-
+  isServerMode = false; // Flag to indicate if running in server mode
   constructor(
+    private appService: AppService,
     private gameService: GameService,
     private dialog: MatDialog,
     private router: Router,
     private renderer: Renderer2,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) { 
+    this.isServerMode = this.appService.isServer;
+    if (this.gameService.getPlayers().length === 0) {
+      this.router.navigate(['/']);
+    }
+  }
 
   ngOnInit(): void {
+    this.gameService.observeGameState();
     this.sub = this.gameService.gameState$.subscribe(state => {
       this.gameState = state;
       this.displayedColumns = state.players.map(p => p.name);
@@ -163,8 +171,13 @@ export class BoardComponent implements OnInit, OnDestroy {
   endGame(): void {
     if (confirm('Bạn chắc chắn muốn kết thúc và xóa toàn bộ dữ liệu?')) {
       this.gameService.resetGame();
-      this.router.navigate(['/setup']);
+      this.router.navigate(['/']);
     }
+  }
+
+  outGame(): void {
+    this.appService.removeGameData();
+    this.router.navigate(['/']);
   }
 
   async exportTableAsPngIonic(): Promise<void> {

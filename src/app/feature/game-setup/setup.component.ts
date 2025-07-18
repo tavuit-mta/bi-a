@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
@@ -26,7 +26,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatButtonModule
   ]
 })
-export class SetupComponent implements OnInit {
+export class SetupComponent {
 
   playerForm: ReturnType<FormBuilder['group']>;
 
@@ -41,15 +41,11 @@ export class SetupComponent implements OnInit {
         this.fb.control('', Validators.required)
       ])
     });
-  }
-
-  ngOnInit(): void {
-    // Check if players already exist in GameService
-    const players = this.gameService.getPlayers?.();
-    if (players && Array.isArray(players) && players.length > 0) {
-      // Redirect to board if players exist
-      this.router.navigate(['/board']);
-    }
+    this.gameService.gameState$.subscribe(state => {
+      if (state.players.length > 0) {
+        this.router.navigate(['/board']);
+      }
+    });
   }
 
   get players() {

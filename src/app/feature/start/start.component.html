@@ -2,4 +2,19 @@
   <button mat-raised-button color="primary" (click)="startGame()">
     Bắt đầu chơi
   </button>
+
+  <button mat-raised-button color="primary" (click)="joinGame()">
+    Tham gia chơi
+  </button>
+
+  <form *ngIf="showJoinGame" class="add-player-form" (ngSubmit)="confirmJoinGame()">
+    <mat-form-field appearance="outline" class="add-player-input" [subscriptSizing]="'dynamic'">
+      <mat-label>Game ID</mat-label>
+      <input matInput [(ngModel)]="joinGameCode" name="joinGameCode" required [ngModelOptions]="{standalone: true}" />
+    </mat-form-field>
+    <div class="add-player-actions">
+      <button mat-raised-button color="primary" type="submit">Tham gia</button>
+      <button mat-raised-button color="warn" type="button" (click)="cancelJoinGame()">Hủy</button>
+    </div>
+  </form>
 </div>

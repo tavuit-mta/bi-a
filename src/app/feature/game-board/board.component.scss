@@ -95,6 +95,10 @@
   }
 }
 
+.max-height {
+  height: 100% !important;
+}
+
 @media (max-width: 600px) {
   .fixed-width-table {
     th.fixed-col,

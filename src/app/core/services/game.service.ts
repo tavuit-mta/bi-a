@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { GameState } from '../../models/game-state.model';
 import { Player } from '../../models/player.model';
 import { GameResult, PenaltyDetail } from '../../models/game-result.model';
+import { AppService } from '../../app.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,12 +18,19 @@ export class GameService {
 
   public gameState$ = this._gameState$.asObservable();
 
-  constructor() {
+  constructor(
+    private appService: AppService
+  ) {
     this.loadFromStorage();
   }
 
   getPlayers(): Player[] {
     return this._gameState$.value.players;
+  }
+
+  pushGameData(result: GameState): void {
+    console.log('Pushing game data:', result);
+    this._gameState$.next(result);
   }
 
   setPlayers(players: Player[]): void {
@@ -31,7 +39,7 @@ export class GameService {
       ...current,
       players
     };
-    this._gameState$.next(newState);
+    this.pushGameData(newState);
     this.saveToStorage();
   }
 
@@ -57,7 +65,7 @@ export class GameService {
       ...current,
       results: newResults
     };
-    this._gameState$.next(newState);
+    this.pushGameData(newState);
     this.saveToStorage();
   }
 
@@ -76,8 +84,8 @@ export class GameService {
       // Remove penalties involving this player
       const penalties = result.penalties
         ? result.penalties.filter(
-            pen => pen.payerId !== playerId && pen.receiverId !== playerId
-          )
+          pen => pen.payerId !== playerId && pen.receiverId !== playerId
+        )
         : [];
       // After removal, ensure sum is still zero (if not, adjust last player)
       const sum = scores.reduce((a, b) => a + b, 0);
@@ -91,8 +99,23 @@ export class GameService {
       players: newPlayers,
       results: newResults
     };
-    this._gameState$.next(newState);
+    this.pushGameData(newState);
     this.saveToStorage();
+  }
+
+  initGameResults(result: GameState): Promise<void> {
+    return new Promise<void>((resolve) => {
+      this._gameState$.next(result);
+      resolve();
+    })
+  }
+
+  observeGameState(): void {
+    if (this.appService.isServer) {
+      return
+    }
+    console.log('Observing game state from server...');    
+    this.appService.getGameData(this);
   }
 
   addGameResult(result: GameResult): void {
@@ -101,7 +124,7 @@ export class GameService {
       ...current,
       results: [...current.results, result]
     };
-    this._gameState$.next(newState);
+    this.pushGameData(newState);
     this.saveToStorage();
   }
 
@@ -113,7 +136,7 @@ export class GameService {
       ...current,
       results: newResults
     };
-    this._gameState$.next(newState);
+    this.pushGameData(newState);
     this.saveToStorage();
   }
 
@@ -125,7 +148,7 @@ export class GameService {
       ...current,
       results: newResults
     };
-    this._gameState$.next(newState);
+    this.pushGameData(newState);
     this.saveToStorage();
   }
 
@@ -134,8 +157,9 @@ export class GameService {
       players: [],
       results: []
     };
-    this._gameState$.next(newState);
+    this.pushGameData(newState);
     localStorage.removeItem(this.STORAGE_KEY);
+    this.appService.removeGameData();
   }
 
   private saveToStorage(): void {
@@ -143,6 +167,7 @@ export class GameService {
       this.STORAGE_KEY,
       JSON.stringify(this._gameState$.value)
     );
+    this.appService.pushGameData(this._gameState$.value);
   }
 
   private loadFromStorage(): void {
@@ -160,7 +185,7 @@ export class GameService {
           penalties: result.penalties ?? [],
           remainingPoints: result.remainingPoints ?? []
         }));
-        this._gameState$.next(data);
+        this.pushGameData(data);
       } catch {
         this.resetGame();
       }

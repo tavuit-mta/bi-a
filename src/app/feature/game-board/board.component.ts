@@ -52,7 +52,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   showAddPlayerInput = false;
   addPlayerName = '';
   addPlayerError = '';
-  showTotalRow = true;
+  showTotalRow = false; 
 
   album = 'BilliardScore'; // Default album name for saving images
 
@@ -80,7 +80,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   openAddGameDialog(): void {
     this.dialog.open(AddGameDialogComponent, {
-      width: '400px',
+      width: '90%',
       disableClose: true,
       data: { mode: ModalMode.Add }
     });
@@ -143,7 +143,7 @@ export class BoardComponent implements OnInit, OnDestroy {
       : this.gameState.players.slice(0, result.nPlayers);
 
     this.dialog.open(AddGameDialogComponent, {
-      width: '400px',
+      width: '90%',
       disableClose: true,
       data: {
         mode: ModalMode.View,
@@ -222,8 +222,19 @@ export class BoardComponent implements OnInit, OnDestroy {
           directory: Directory.Cache
         });
 
+        const albumsResponse = await Media.getAlbums();
+        let album = albumsResponse.albums.find(a => a.name === this.album);
+
+        if (!album) {
+          await Media.createAlbum({ name: this.album });
+          // Refresh albums list
+          const newAlbumsResponse = await Media.getAlbums();
+          album = newAlbumsResponse.albums.find(a => a.name === this.album);
+        }
+
         const mediaSaveOptions: MediaSaveOptions = {
           path: savedFile.uri,
+          albumIdentifier: album?.identifier
         };
 
         await Media.savePhoto(mediaSaveOptions);

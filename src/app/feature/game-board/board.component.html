@@ -19,7 +19,9 @@
               </button>
             </td>
             <td mat-footer-cell *matFooterCellDef class="fixed-col total-row sum-label-footer">
-              <strong>Sum</strong>
+              <button mat-raised-button color="warn" aria-label="Tổng điểm" (click)="toggleTotalRow()">
+                <strong>{{ showTotalRow ? 'Ẩn' : 'Hiển thị'}} điểm</strong>
+              </button>
             </td>
           </ng-container>
 
@@ -35,15 +37,13 @@
               {{ element.scores[i] || 0 }}
             </td>
             <td mat-footer-cell *matFooterCellDef class="fixed-col total-row">
-              <strong>{{ totalScores[i] }}</strong>
+              <strong>{{ showTotalRow ? totalScores[i] : '**' }}</strong>
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="footerAndDisplayedColumns; sticky: true"></tr>
           <tr mat-row *matRowDef="let row; columns: footerAndDisplayedColumns"></tr>
-          <ng-container *ngIf="showTotalRow">
-            <tr mat-footer-row *matFooterRowDef="footerAndDisplayedColumns" class="total-row"></tr>
-          </ng-container>
+          <tr mat-footer-row *matFooterRowDef="footerAndDisplayedColumns" class="total-row"></tr>
         </table>
       </div>
     </mat-card-content>
@@ -55,8 +55,8 @@
       <button mat-raised-button color="warn" class="action-btn" (click)="endGame()">
         Kết Thúc & Xóa Dữ Liệu
       </button>
-      <button mat-raised-button color="accent" class="action-btn" (click)="exportTableAsPngIonic()">
-        Export as PNG
+      <button mat-raised-button color="primary" class="action-btn" (click)="exportTableAsPngIonic()">
+        Xuất ảnh 
       </button>
       <button mat-raised-button color="primary" class="action-btn" (click)="showAddPlayer()">
         Thêm người chơi

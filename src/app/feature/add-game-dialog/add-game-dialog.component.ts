@@ -102,7 +102,7 @@ export class AddGameDialogComponent implements OnInit {
       this.players = this.data.players.map((p: Player) => ({ ...p }));
       this.rebuildForm(this.data.result);
     } 
-    
+
     if (this.data.mode === ModalMode.Edit) {
       this.isEditMode = true;
       this.isViewMode = false;
@@ -149,7 +149,7 @@ export class AddGameDialogComponent implements OnInit {
         })
       );
       (this.form.get('remainingTiles') as FormArray).push(
-        new FormControl(0)
+        new FormControl(0, Validators.min(0))
       );
     });
 
@@ -240,11 +240,14 @@ export class AddGameDialogComponent implements OnInit {
 
   private updateWinnerInput(winnerId: number): void {
     this.remainingTilesArray.controls.forEach((ctrl, idx) => {
-      ctrl.setValue(0, { emitEvent: false });
       if (this.players[idx].id === winnerId) {
         ctrl.disable({ emitEvent: false });
+        ctrl.setValue(0, { emitEvent: false });
       } else {
+        ctrl.setValue(null, { emitEvent: false });
         ctrl.enable({ emitEvent: false });
+        ctrl.addValidators([Validators.required, Validators.min(1)]);
+        ctrl.updateValueAndValidity({ emitEvent: false });
       }
     });
   }
@@ -331,6 +334,12 @@ export class AddGameDialogComponent implements OnInit {
     }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      if (this.form.get('winner')?.invalid) {
+        alert('Vui lòng chọn người chiến thắng.');
+      }
+      if (this.remainingTilesArray.invalid) {
+        alert('Vui lòng nhập số lá còn lại cho tất cả người chơi.');
+      }
       return;
     }
 

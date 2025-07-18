@@ -26,6 +26,9 @@
             <mat-form-field appearance="outline" class="tiles-input">
               <mat-label>Số lá còn lại</mat-label>
               <input matInput numberPattern type="number" [formControl]="remainingForm(idx)" pattern="[0-9]*"/>
+              <mat-error *ngIf="remainingForm(idx).hasError('required')">
+                Vui lòng nhập số lá còn lại.
+              </mat-error>
             </mat-form-field>
             <div class="extended-per-player" [formGroup]="extendedForm(idx)">
               <!-- Common Points Row (always visible) -->

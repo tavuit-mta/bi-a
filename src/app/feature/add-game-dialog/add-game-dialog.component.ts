@@ -16,6 +16,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
 import { NumberPatternClearDirective } from '../../shared/number-pattern-clear.directive';
+import { AppService } from '../../app.service';
 
 
 @Component({
@@ -52,6 +53,7 @@ export class AddGameDialogComponent implements OnInit {
   accordion: Signal<MatAccordion> = viewChild.required(MatAccordion);
   modelMode: ModalMode = ModalMode.Add; // Default to Add mode
   ModelMode = ModalMode;
+  isServerMode = false; // Flag to indicate if running in server mode
 
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
@@ -85,9 +87,12 @@ export class AddGameDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AddGameDialogComponent>,
     private gameService: GameService,
+    private appService: AppService,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+  ) {
+    this.isServerMode = this.appService.isServer;
+  }
 
   ngOnInit(): void {
     this.modelMode = this.data.mode;

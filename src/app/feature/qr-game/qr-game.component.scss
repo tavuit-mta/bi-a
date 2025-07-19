@@ -1,0 +1,14 @@
+/* Put this code in your CSS file, e.g. app.component.css */
+
+/* The div container */
+.qrcodeImage {
+  display: flex;
+  flex: 1;
+}
+
+/* Add custom styles here */
+.center {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}

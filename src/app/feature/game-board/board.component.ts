@@ -21,6 +21,7 @@ import { ModalMode } from '../../models/game-state.model';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Media, MediaSaveOptions } from '@capacitor-community/media';
 import { AppService } from '../../app.service';
+import { QrGameComponent } from '../qr-game/qr-game.component';
 
 @Component({
   standalone: true,
@@ -274,13 +275,16 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     if (this.gameState.results && this.gameState.results.length) {
       for (const result of this.gameState.results) {
-        // Only sum scores for players that match the main list
         for (let i = 0; i < numPlayers; i++) {
           totals[i] += result.scores[i] || 0;
         }
       }
     }
     this.totalScores = totals;
+  }
+
+  public showQrCode(): void {
+    this.dialog.open(QrGameComponent);
   }
 
   ngOnDestroy(): void {

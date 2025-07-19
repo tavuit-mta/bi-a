@@ -1,5 +1,5 @@
 <h2 mat-dialog-title>
-  {{ isViewMode ? 'Sửa Ván Đấu' : 'Thêm Ván Đấu' }}
+  {{ isViewMode ? !isServerMode ? 'Xem ván đấu' : 'Sửa Ván Đấu' : 'Thêm Ván Đấu' }}
 </h2>
 <mat-dialog-content [formGroup]="form" class="add-game-dialog-content">
   <mat-form-field class="full-width" appearance="outline" subscriptSizing="dynamic">
@@ -60,7 +60,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="warn" (click)="cancel()">Hủy</button>
-  <button mat-raised-button color="primary" (click)="save()">
+  <button mat-raised-button color="primary" (click)="save()" *ngIf="isServerMode">
     {{ isEditMode ? 'Lưu' : 'Cập nhật' }}
   </button>
 </mat-dialog-actions>

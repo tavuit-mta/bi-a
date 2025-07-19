@@ -2,7 +2,7 @@ import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { AppService } from '../../app.service';
-import { v4 as uuidv4 } from 'uuid';
+import { v6 as uuidv6 } from 'uuid';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -47,7 +47,13 @@ export class StartComponent implements OnDestroy {
   }
 
   startGame(): void {
-    const GAME_ID = uuidv4();
+    const options = {
+      node: Uint8Array.of(0x01, 0x23, 0x45, 0x67, 0x89, 0xab),
+      clockseq: 0x1234,
+      msecs: new Date().getTime(),
+      nsecs: 5678,
+    };
+    const GAME_ID = uuidv6(options);
     this.appService.initializeGame(GAME_ID).then(() => {
       this.appService.storeGamePath(GAME_ID, 'true');
       this.router.navigate(['/setup']);
@@ -120,7 +126,7 @@ export class StartComponent implements OnDestroy {
           this.appService.storeGamePath(this.joinGameCode, 'false');
           this.router.navigate(['/board']);
         } else {
-          this.appService.deleteGameData();
+          this.appService.deleteGameData(this.gameService);
         }
       });
   }

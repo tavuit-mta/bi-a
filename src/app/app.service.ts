@@ -3,7 +3,7 @@ import { deleteDoc, doc, docData, DocumentData, Firestore, getDoc, onSnapshot, s
 import { Observable } from 'rxjs';
 import { GameService } from './core/services/game.service';
 import { GameState } from './models/game-state.model';
-
+import moment from 'moment';
 @Injectable({
   providedIn: 'root'
 })
@@ -38,6 +38,8 @@ export class AppService {
 
   initializeGame(path: string, isJoinGame: boolean = false): Promise<GameState> {
     return new Promise<GameState>((resolve, reject) => {
+      const currentDate = moment().format('YYYY_MM_DD');
+      this.gamePath = this.gamePath + currentDate;
       const docRef = doc(this.firestore, this.gamePath, path);
       getDoc(docRef).then(docSnapshot => {                
         if (docSnapshot.exists()) {
@@ -87,19 +89,23 @@ export class AppService {
     return updateDoc(documentRef, data);
   }
 
-  removeGameData(): void {
-    localStorage.removeItem(this.PATH_KEY);
-    localStorage.removeItem(this.SERVER_KEY);
+  async removeGameData(gameService: GameService): Promise<void> {
+    return new Promise<void>((resolve) => {
+       localStorage.removeItem(this.PATH_KEY);
+       localStorage.removeItem(this.SERVER_KEY);
+       gameService.pushGameData({ players: [], results: [] });
+       resolve();
+    });
   }
 
-  deleteGameData(): Promise<void> {
+  async deleteGameData(gameService: GameService): Promise<void> {
     const path = localStorage.getItem(this.PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
     const documentRef = doc(this.firestore, this.gamePath, path);
     return deleteDoc(documentRef).then(() => {
-      this.removeGameData();
+      this.removeGameData(gameService);
     });
   }
 

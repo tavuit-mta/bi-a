@@ -3,12 +3,12 @@
     <mat-card-title [ngStyle]="{'padding': '8px'}">Thiết lập người chơi</mat-card-title>
     <mat-card-content>
       <form [formGroup]="playerForm">
-        <div formArrayName="players">
+        <div formArrayName="players" class="players-list">
           <div
             *ngFor="let playerCtrl of players.controls; let i = index"
             class="player-field"
           >
-            <mat-form-field appearance="outline" class="player-input">
+            <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
               <mat-label>Tên người chơi {{ i + 1 }}</mat-label>
               <input matInput [formControlName]="i" />
               <mat-error *ngIf="playerCtrl.hasError('required')">

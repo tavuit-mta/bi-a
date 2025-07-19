@@ -177,8 +177,10 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   outGame(): void {
-    this.appService.removeGameData();
-    this.router.navigate(['/']);
+    this.appService.removeGameData(this.gameService).then(()=>{
+      this.router.navigate(['/']);
+    });
+    
   }
 
   async exportTableAsPngIonic(): Promise<void> {

@@ -9,7 +9,7 @@ import { AppService } from '../../app.service';
   providedIn: 'root'
 })
 export class GameService {
-  private readonly STORAGE_KEY = 'billiards_game_state';
+  private readonly STORAGE_KEY = 'BILLIARD_SCORE_GAME_STATE';
 
   private _gameState$ = new BehaviorSubject<GameState>({
     players: [],
@@ -159,7 +159,7 @@ export class GameService {
     };
     this.pushGameData(newState);
     localStorage.removeItem(this.STORAGE_KEY);
-    this.appService.removeGameData();
+    this.appService.removeGameData(this);
   }
 
   private saveToStorage(): void {

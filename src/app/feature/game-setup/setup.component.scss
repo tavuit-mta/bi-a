@@ -17,3 +17,11 @@
   justify-content: center;
   align-items: center;
 }
+
+.players-list {
+  margin-top: 32px;
+  
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

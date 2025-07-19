@@ -49,5 +49,7 @@
 	<string>Ứng dụng cần quyền để lưu ảnh vào thư viện ảnh của bạn.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Ứng dụng cần quyền để truy cập thư viện ảnh của bạn để lưu ảnh chụp bảng điểm.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>To be able to scan barcodes</string>
 </dict>
 </plist>

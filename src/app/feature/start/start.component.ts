@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { AppService } from '../../app.service';
@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { Subject, takeUntil } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
 @Component({
   standalone: true,
@@ -27,13 +28,15 @@ import { GameState } from '../../models/game-state.model';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatButtonModule
   ]
 })
 export class StartComponent implements OnDestroy {
   showJoinGame = false;
   joinGameCode = '';
   onDestroy$: Subject<void> = new Subject<void>();
+  startScanning = false;
+  // This binds the 'scanner-active' class to the host element (<app-your-page>)
+  @HostBinding('class.scanner-active') scannerActive = false;
 
   constructor(private router: Router, private appService: AppService, private gameService: GameService) {
     if (this.appService.hasStartedGame()) {
@@ -49,6 +52,38 @@ export class StartComponent implements OnDestroy {
       this.appService.storeGamePath(GAME_ID, 'true');
       this.router.navigate(['/setup']);
     })
+  }
+
+  stopScanQR(): void {
+    BarcodeScanner.stopScan();
+    BarcodeScanner.showBackground();
+    this.startScanning = false;
+    this.scannerActive = false; // Deactivate our CSS styles
+  }
+
+  async scanQR(): Promise<void> {
+    try {
+      await BarcodeScanner.checkPermission({ force: true });
+      BarcodeScanner.hideBackground();
+      this.startScanning = true;
+      this.scannerActive = true; // Activate our CSS styles
+
+      const result = await BarcodeScanner.startScan();
+
+      if (result.hasContent) {
+        this.startScanning = false;
+        const scannedCode = result.content;
+        this.joinGameCode = scannedCode;
+        BarcodeScanner.stopScan();
+        this.confirmJoinGame();
+      }
+
+      this.stopScanQR();
+      
+    } catch (error) {
+      this.startScanning = false;
+      alert('Failed to scan QR code. Please try again.');
+    }
   }
 
   joinGame(): void {

@@ -53,9 +53,9 @@ export class StartComponent implements OnDestroy {
       msecs: new Date().getTime(),
       nsecs: 5678,
     };
-    const GAME_ID = uuidv6(options);
+    const GAME_ID = uuidv6(options).toLocaleUpperCase();
     this.appService.initializeGame(GAME_ID).then(() => {
-      this.appService.storeGamePath(GAME_ID, 'true');
+      this.appService.storeGamePath(GAME_ID, true);
       this.router.navigate(['/setup']);
     })
   }
@@ -72,7 +72,7 @@ export class StartComponent implements OnDestroy {
       await BarcodeScanner.checkPermission({ force: true });
       BarcodeScanner.hideBackground();
       this.startScanning = true;
-      this.scannerActive = true; // Activate our CSS styles
+      this.scannerActive = true; 
 
       const result = await BarcodeScanner.startScan();
 
@@ -114,7 +114,7 @@ export class StartComponent implements OnDestroy {
   loadGameData(gameData: GameState | null = null): void {
     if (gameData && gameData.players && gameData.players.length > 0) {
       this.gameService.pushGameData(gameData);
-      this.appService.storeGamePath(this.joinGameCode, 'false');
+      this.appService.storeGamePath(this.joinGameCode, false);
       this.router.navigate(['/board']);
       return;
     }
@@ -123,7 +123,7 @@ export class StartComponent implements OnDestroy {
       .subscribe((gameState: GameState) => {
         if (gameState?.players?.length > 0) {
           this.gameService.pushGameData(gameState);
-          this.appService.storeGamePath(this.joinGameCode, 'false');
+          this.appService.storeGamePath(this.joinGameCode, false);
           this.router.navigate(['/board']);
         } else {
           this.appService.deleteGameData(this.gameService);

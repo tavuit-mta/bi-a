@@ -9,7 +9,7 @@ import moment from 'moment';
 })
 export class AppService {
   firestore = inject(Firestore);
-  gamePath: string = 'BILLIARD_SCORE_';
+  gamePath: string = 'BILLIARD_SCORE_' + moment().format('YYYY_MM_DD');
 
   PATH_KEY = 'BILLIARD_SCORE_PATH';
   SERVER_KEY = 'BILLIARD_SCORE_SERVER';
@@ -31,22 +31,21 @@ export class AppService {
     return Boolean(gamePath);
   }
 
-  storeGamePath(path: string, isServer: 'false' | 'true'): void {
+  storeGamePath(path: string, isServer: boolean): void {
     localStorage.setItem(this.PATH_KEY, path);
-    localStorage.setItem(this.SERVER_KEY, isServer);
+    localStorage.setItem(this.SERVER_KEY, JSON.stringify(isServer));
   }
 
   initializeGame(path: string, isJoinGame: boolean = false): Promise<GameState> {
     return new Promise<GameState>((resolve, reject) => {
-      const currentDate = moment().format('YYYY_MM_DD');
-      this.gamePath = this.gamePath + currentDate;
-      const docRef = doc(this.firestore, this.gamePath, path);
+      const basePath = this.gamePath
+      const docRef = doc(this.firestore, basePath, path);
       getDoc(docRef).then(docSnapshot => {                
         if (docSnapshot.exists()) {
           resolve(docSnapshot.data() as GameState);
         } 
         if (!isJoinGame) {
-          setDoc(docRef, {}).then(() => {
+          setDoc(docRef, {} as GameState).then(() => {
             resolve({} as GameState);
           })
         } else {
@@ -61,7 +60,8 @@ export class AppService {
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
-    const documentRef = doc(this.firestore, this.gamePath, path);
+    const basePath = this.gamePath;
+    const documentRef = doc(this.firestore, basePath, path);
     onSnapshot(documentRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data() as GameState;
@@ -76,7 +76,8 @@ export class AppService {
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
-    const documentRef = doc(this.firestore, this.gamePath, path);
+    const basePath = this.gamePath;
+    const documentRef = doc(this.firestore, basePath, path);
     return docData(documentRef) as Observable<GameState>;
   }
 
@@ -85,7 +86,8 @@ export class AppService {
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
-    const documentRef = doc(this.firestore, this.gamePath, path);
+    const basePath = this.gamePath;
+    const documentRef = doc(this.firestore, basePath, path);
     return updateDoc(documentRef, data);
   }
 
@@ -103,7 +105,8 @@ export class AppService {
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
-    const documentRef = doc(this.firestore, this.gamePath, path);
+    const basePath = this.gamePath;
+    const documentRef = doc(this.firestore, basePath, path);
     return deleteDoc(documentRef).then(() => {
       this.removeGameData(gameService);
     });

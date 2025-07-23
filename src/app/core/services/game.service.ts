@@ -37,6 +37,17 @@ export class GameService {
     this._gameState$.next(resultObject);
   }
 
+  putPlayer(player: PlayerModel): void {
+    const current = this._gameState$.value;
+    const players = current.players.map(p => p.id === player.id ? player : p);
+    const newState: GameState = {
+      ...current, 
+      players
+    };
+    this.pushGameData(newState);
+    this.saveToStorage();
+  }
+
   setPlayers(players: PlayerModel[]): void {
     const current = this._gameState$.value;
     const newState: GameState = {

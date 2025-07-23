@@ -59,8 +59,9 @@ export class BoardComponent implements OnInit, OnDestroy {
   addPlayerError = '';
   showTotalRow = false;
 
-  album = 'BilliardScore'; // Default album name for saving images
-  isServerMode = false; // Flag to indicate if running in server mode
+  album = 'BilliardScore';
+  isServerMode = false;
+
   constructor(
     private appService: AppService,
     private gameService: GameService,
@@ -142,9 +143,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.addPlayerError = '';
   }
 
-  // --- Edit Game Feature ---
   editGame(result: GameResult, rowIndex: number): void {
-    // Use the players array stored in the result for this game
     const playersForGame = result.players && result.players.length > 0
       ? result.players
       : this.gameState.players.slice(0, result.nPlayers);
@@ -276,11 +275,29 @@ export class BoardComponent implements OnInit, OnDestroy {
     if (this.gameState.results && this.gameState.results.length) {
       for (const result of this.gameState.results) {
         for (let i = 0; i < numPlayers; i++) {
-          totals[i] += result.scores[i] || 0;
+          // totals[i] += result.scores[i] || 0;
+          var playerIndex = result.players.findIndex(p => p.id === this.gameState.players[i].id);
+          if (playerIndex !== -1) {
+            totals[i] += result.scores[playerIndex] || 0;
+          }
         }
       }
     }
     this.totalScores = totals;
+  }
+
+  getScore(player: PlayerModel, result: GameResult): number {
+
+    const playerIndex = result.players.findIndex(p => p.id === player.id);
+    if (playerIndex === -1) {
+      return 0;
+    }
+    return result.scores[playerIndex] || 0;
+  }
+
+  changeStatus(player: PlayerModel): void {
+    player.inactivePlayer();
+    this.gameService.putPlayer(player);
   }
 
   public showQrCode(): void {

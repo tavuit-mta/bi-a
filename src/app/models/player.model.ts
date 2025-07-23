@@ -21,8 +21,12 @@ export class PlayerModel implements Player {
     this.active = active;
   }
 
-  changeStatus(): void {
-    this.active = !this.active;
+  activePlayer(): void {
+    this.active = true;
+  }
+
+  inactivePlayer(): void {
+    this.active = false;
   }
 
   toJSON(): Player {

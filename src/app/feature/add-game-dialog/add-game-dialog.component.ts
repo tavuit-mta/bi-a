@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractCon
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { GameService } from '../../core/services/game.service';
 import { GameState, ModalMode } from '../../models/game-state.model';
-import { Player } from '../../models/player.model';
+import { PlayerModel } from '../../models/player.model';
 import { GameResult, PenaltyDetail } from '../../models/game-result.model';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,11 +41,12 @@ import { AppService } from '../../app.service';
   ]
 })
 export class AddGameDialogComponent implements OnInit {
+  private _players: PlayerModel[] = [];
+
   form!: FormGroup;
   gameState!: GameState;
   totalPoints: number[] = [];
   sortedPlayerIndexes: number[] = [];
-  players: Player[] = [];
   isViewMode = false;
   isEditMode = false;
   editRowIndex: number | null = null;
@@ -54,6 +55,18 @@ export class AddGameDialogComponent implements OnInit {
   modelMode: ModalMode = ModalMode.Add; // Default to Add mode
   ModelMode = ModalMode;
   isServerMode = false; // Flag to indicate if running in server mode
+
+  get players(): PlayerModel[] {
+    return this._players;
+  }
+
+  set players(value: PlayerModel[]) {
+    this._players = value.filter(p => p.active);
+  }
+
+  get nPlayers(): number {
+    return this.players.length;
+  }
 
   get losersForm(): FormGroup {
     return this.form.get('losers') as FormGroup;
@@ -73,10 +86,6 @@ export class AddGameDialogComponent implements OnInit {
 
   remainingForm(i: number): FormControl {
     return this.remainingTilesArray.at(i) as FormControl;
-  }
-
-  get nPlayers(): number {
-    return this.players.length;
   }
 
   penaltyControl(control: AbstractControl, type: 'selected' | 'amount'): FormControl {
@@ -104,7 +113,7 @@ export class AddGameDialogComponent implements OnInit {
       this.isViewMode = true;
       this.isEditMode = false;
       this.editRowIndex = this.data.rowIndex;
-      this.players = this.data.players.map((p: Player) => ({ ...p }));
+      this.players = this.data.players.map((p: PlayerModel) => ({ ...p }));
       this.rebuildForm(this.data.result);
     } 
 
@@ -112,7 +121,7 @@ export class AddGameDialogComponent implements OnInit {
       this.isEditMode = true;
       this.isViewMode = false;
       this.editRowIndex = this.data.rowIndex;
-      this.players = this.data.players.map((p: Player) => ({ ...p }));
+      this.players = this.data.players.map((p: PlayerModel) => ({ ...p }));
       this.rebuildForm(this.data.result);
     }
     
@@ -120,7 +129,7 @@ export class AddGameDialogComponent implements OnInit {
       if (this.data.mode === ModalMode.Add) {
         this.isEditMode = true;
         this.isViewMode = false;
-        this.players = state.players.map(p => ({ ...p }));
+        this.players = state.players.map(p => ({ ...p } as PlayerModel));
         this.rebuildForm();
       }
     });
@@ -221,9 +230,7 @@ export class AddGameDialogComponent implements OnInit {
     this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
       this.form.reset({ winner: winnerId }, { emitEvent: false });
       this.recalculateAllScores();
-      // Recalculate scores and update UI
       this.cdr.detectChanges();
-      // Update winner input and sort players
       this.updateWinnerInput(winnerId);
       this.sortPlayersByWinner(winnerId);
     });
@@ -380,8 +387,8 @@ export class AddGameDialogComponent implements OnInit {
     });
 
     const result: GameResult = {
-      nPlayers: this.players.length,
-      players: this.players.map(p => ({ id: p.id, name: p.name, profileId: p.profileId })),
+      nPlayers: this.nPlayers,
+      players: this.players.map(p => ({ id: p.id, name: p.name, profileId: p.profileId, active: p.active })),
       winnerId: this.form.value.winner,
       scores,
       commonPoints,

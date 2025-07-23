@@ -25,7 +25,7 @@ export class Profile implements IProfile {
         this.username = username;
         this.bankAccount = bankAccount;
 
-        this.avatarUrl = `https://api.dicebear.com/5.x/bottts-neutral/svg?seed=${generateRandomString(16)}`;
+        this.avatarUrl = Profile.generateRandomAvatar();
     }
 
     private static instance: Profile;
@@ -35,6 +35,10 @@ export class Profile implements IProfile {
             Profile.instance = new Profile();
         }
         return Profile.instance;
+    }
+
+    static generateRandomAvatar(): string {
+        return `https://api.dicebear.com/5.x/bottts-neutral/svg?seed=${generateRandomString(16)}`
     }
 
     static generateProfileId(): string {

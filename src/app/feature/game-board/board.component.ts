@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
-import { Player } from '../../models/player.model';
+import { Player, PlayerModel } from '../../models/player.model';
 import { GameResult } from '../../models/game-result.model';
 import { AddGameDialogComponent } from '../add-game-dialog/add-game-dialog.component';
 import { MatCardModule } from '@angular/material/card';
@@ -23,6 +23,7 @@ import { Media, MediaSaveOptions } from '@capacitor-community/media';
 import { AppService } from '../../app.service';
 import { QrGameComponent } from '../qr-game/qr-game.component';
 import { Profile } from '../../models/profile.model';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   standalone: true,
@@ -39,7 +40,8 @@ import { Profile } from '../../models/profile.model';
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatChipsModule
   ],
 })
 export class BoardComponent implements OnInit, OnDestroy {
@@ -55,7 +57,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   showAddPlayerInput = false;
   addPlayerName = '';
   addPlayerError = '';
-  showTotalRow = false; 
+  showTotalRow = false;
 
   album = 'BilliardScore'; // Default album name for saving images
   isServerMode = false; // Flag to indicate if running in server mode
@@ -66,7 +68,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     private router: Router,
     private renderer: Renderer2,
     private cdr: ChangeDetectorRef
-  ) { 
+  ) {
     this.isServerMode = this.appService.isServer;
     if (this.gameService.getPlayers().length === 0) {
       this.router.navigate(['/']);
@@ -121,7 +123,14 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
     // Generate a new unique id
     const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
-    const newPlayer: Player = { id: newId, name, profileId: Profile.generateProfileId() };
+
+    const newPlayer: PlayerModel = new PlayerModel(
+      newId, 
+      name, 
+      Profile.generateProfileId(), 
+      Profile.generateRandomAvatar(), 
+      true
+    )
 
     // Add player to GameService (which will update gameState and persist)
     this.gameService.addPlayer(newPlayer);
@@ -178,10 +187,10 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   outGame(): void {
-    this.appService.removeGameData(this.gameService).then(()=>{
+    this.appService.removeGameData(this.gameService).then(() => {
       this.router.navigate(['/']);
     });
-    
+
   }
 
   async exportTableAsPngIonic(): Promise<void> {

@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
-import { Player } from '../../models/player.model';
+import { Player, PlayerModel } from '../../models/player.model';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,6 +13,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { Profile } from '../../models/profile.model';
 import { combineLatest } from 'rxjs';
 import { AppService } from '../../app.service';
+import { GameState } from '../../models/game-state.model';
 
 @Component({
   standalone: true,
@@ -35,6 +36,7 @@ export class SetupComponent implements OnInit {
   playerForm: ReturnType<FormBuilder['group']>;
   isServerMode = false; // Flag to indicate if running in server mode
   profile!: Profile;
+  gameState!: GameState;
 
   constructor(
     private fb: FormBuilder,
@@ -52,9 +54,11 @@ export class SetupComponent implements OnInit {
       this.profileService.getProfile()
     ]).subscribe(([gameState, profile]) => {
       this.profile = profile;
+      this.gameState = gameState;
+
       if (!profile || !profile.isComplete()) {
         this.router.navigate(['/profile']);
-      } else if (gameState.players.some(p => p.name === profile.username)) {
+      } else if (gameState.players.some(p => p.profileId === profile.profileId)) {
         this.router.navigate(['/board']);
       } else if (profile && profile.username) {
         this.addPlayer(profile.username);
@@ -86,12 +90,15 @@ export class SetupComponent implements OnInit {
       return;
     }
     const playerNames: string[] = this.players.value.filter((name: string) => !!name);
-    const players: Player[] = playerNames.map((name, idx) => ({
-      id: idx,
+    const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
+    const players: PlayerModel[] = playerNames.map((name) => new PlayerModel(
+      newId,
       name,
-      profileId: this.profile.profileId // Associate player with profile
-    }));
-    
+      Profile.generateProfileId(),
+      Profile.generateRandomAvatar(),
+      true
+    ));
+
     if (this.isServerMode) {
       this.gameService.setPlayers(players);
     } else {
@@ -104,5 +111,9 @@ export class SetupComponent implements OnInit {
 
   editProfile(): void {
     this.router.navigate(['/profile'], { queryParams: { fromSetup: true } });
+  }
+
+  view(): void {
+    this.router.navigate(['/board']);
   }
 }

@@ -249,8 +249,8 @@ export class AddGameDialogComponent implements OnInit {
         ctrl.disable({ emitEvent: false });
         ctrl.setValue(0, { emitEvent: false });
       } else {
-        ctrl.setValue(null, { emitEvent: false });
         ctrl.enable({ emitEvent: false });
+        ctrl.setValue(null, { emitEvent: false });
         ctrl.addValidators([Validators.required, Validators.min(1)]);
         ctrl.updateValueAndValidity({ emitEvent: false });
       }
@@ -381,7 +381,7 @@ export class AddGameDialogComponent implements OnInit {
 
     const result: GameResult = {
       nPlayers: this.players.length,
-      players: this.players.map(p => ({ id: p.id, name: p.name })),
+      players: this.players.map(p => ({ id: p.id, name: p.name, profileId: p.profileId })),
       winnerId: this.form.value.winner,
       scores,
       commonPoints,

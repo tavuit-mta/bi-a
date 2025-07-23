@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { GameState } from '../../models/game-state.model';
-import { Player } from '../../models/player.model';
+import { Player, PlayerModel } from '../../models/player.model';
 import { GameResult, PenaltyDetail } from '../../models/game-result.model';
 import { AppService } from '../../app.service';
 
@@ -33,7 +33,7 @@ export class GameService {
     this._gameState$.next(result);
   }
 
-  setPlayers(players: Player[]): void {
+  setPlayers(players: PlayerModel[]): void {
     const current = this._gameState$.value;
     const newState: GameState = {
       ...current,
@@ -43,13 +43,13 @@ export class GameService {
     this.saveToStorage();
   }
 
-  addPlayer(player: Player): void {
+  addPlayer(player: PlayerModel): void {
     const current = this._gameState$.value;
     const newPlayers = [...current.players, player];
     this.setPlayers(newPlayers);
   }
 
-  addPlayerToResults(player: Player): void {
+  addPlayerToResults(player: PlayerModel): void {
     const current = this._gameState$.value;
     const numPlayers = current.players.length;
     const newResults = (current.results || []).map(result => {

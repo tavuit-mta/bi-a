@@ -41,8 +41,15 @@
         color="accent"
         (click)="submit()"
       >
-        Bắt đầu trận
+        {{ isServerMode ? 'Bắt đầu trận' : 'Tham gia trận đấu' }}
       </button>
+      <!-- <button
+        mat-raised-button
+        color="accent"
+        (click)="view()"
+      >
+        Xem trận đấu
+      </button> -->
     </mat-card-actions>
   </mat-card>
 </div>

@@ -5,7 +5,7 @@
       <button mat-icon-button (click)="showQrCode()">
         <mat-icon>qr_code</mat-icon>
       </button>
-    </mat-card-title> 
+    </mat-card-title>
 
     <mat-card-content class="board-content">
       <div class="table-scroll-wrapper" #tableWrapper [ngClass]="{'max-height': !isServerMode}">
@@ -19,7 +19,8 @@
               <button mat-icon-button color="primary" aria-label="Sửa ván đấu" (click)="editGame(element, rowIndex)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button *ngIf="isServerMode" mat-icon-button color="warn" aria-label="Xóa ván đấu" (click)="deleteGame(element, rowIndex)">
+              <button *ngIf="isServerMode" mat-icon-button color="warn" aria-label="Xóa ván đấu"
+                (click)="deleteGame(element, rowIndex)">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -33,7 +34,10 @@
           <!-- Player columns -->
           <ng-container *ngFor="let player of gameState.players; let i = index" [matColumnDef]="player.name">
             <th mat-header-cell *matHeaderCellDef class="fixed-col">
-              <span>{{ player.name }}</span>
+              <mat-chip>
+                <img matChipAvatar [src]="player.avatar" alt="{{ player.name }}" />
+                {{ player.name }}
+              </mat-chip>
             </th>
             <td mat-cell *matCellDef="let element" class="fixed-col">
               {{ element.scores[i] || 0 }}

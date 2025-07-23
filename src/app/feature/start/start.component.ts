@@ -13,6 +13,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { ProfileService } from '../../core/services/profile.service';
 
 @Component({
   standalone: true,
@@ -31,6 +32,7 @@ import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
   ]
 })
 export class StartComponent implements OnDestroy {
+
   showJoinGame = false;
   joinGameCode = '';
   onDestroy$: Subject<void> = new Subject<void>();
@@ -38,7 +40,11 @@ export class StartComponent implements OnDestroy {
   // This binds the 'scanner-active' class to the host element (<app-your-page>)
   @HostBinding('class.scanner-active') scannerActive = false;
 
-  constructor(private router: Router, private appService: AppService, private gameService: GameService) {
+  constructor(
+    private router: Router,
+    private appService: AppService,
+    private gameService: GameService,
+  ) {
     if (this.appService.hasStartedGame()) {
       console.log('Game already started, redirecting to setup...');
       this.joinGameCode = this.appService.getGamePath();
@@ -72,7 +78,7 @@ export class StartComponent implements OnDestroy {
       await BarcodeScanner.checkPermission({ force: true });
       BarcodeScanner.hideBackground();
       this.startScanning = true;
-      this.scannerActive = true; 
+      this.scannerActive = true;
 
       const result = await BarcodeScanner.startScan();
 
@@ -85,7 +91,7 @@ export class StartComponent implements OnDestroy {
       }
 
       this.stopScanQR();
-      
+
     } catch (error) {
       this.startScanning = false;
       alert('Failed to scan QR code. Please try again.');
@@ -115,7 +121,7 @@ export class StartComponent implements OnDestroy {
     if (gameData && gameData.players && gameData.players.length > 0) {
       this.gameService.pushGameData(gameData);
       this.appService.storeGamePath(this.joinGameCode, false);
-      this.router.navigate(['/board']);
+      this.router.navigate(['/setup']);
       return;
     }
     this.appService.getGameDataOnce()
@@ -124,7 +130,7 @@ export class StartComponent implements OnDestroy {
         if (gameState?.players?.length > 0) {
           this.gameService.pushGameData(gameState);
           this.appService.storeGamePath(this.joinGameCode, false);
-          this.router.navigate(['/board']);
+          this.router.navigate(['/setup']);
         } else {
           this.appService.deleteGameData(this.gameService);
         }

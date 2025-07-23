@@ -111,9 +111,6 @@ export class GameService {
   }
 
   observeGameState(): void {
-    if (this.appService.isServer) {
-      return
-    }
     console.log('Observing game state from server...');    
     this.appService.getGameData(this);
   }

@@ -4,36 +4,36 @@ import { Observable } from 'rxjs';
 import { GameService } from './core/services/game.service';
 import { GameState } from './models/game-state.model';
 import moment from 'moment';
+import { FIREBASE_PATH, PATH_KEY, SERVER_KEY } from './core/constants/core.constant'; // Adjust the import path as necessary
+
 @Injectable({
   providedIn: 'root'
 })
+
 export class AppService {
   firestore = inject(Firestore);
-  gamePath: string = 'BILLIARD_SCORE_' + moment().format('YYYY_MM_DD');
-
-  PATH_KEY = 'BILLIARD_SCORE_PATH';
-  SERVER_KEY = 'BILLIARD_SCORE_SERVER';
+  gamePath: string = [FIREBASE_PATH, moment().format('YYYY_MM_DD')].join('_');
 
   constructor() {
   }
 
   get isServer(): boolean {
-    const server = localStorage.getItem(this.SERVER_KEY);
+    const server = localStorage.getItem(SERVER_KEY);
     return server === 'true';
   }
 
   getGamePath(): string {
-    return localStorage.getItem(this.PATH_KEY) || '';
+    return localStorage.getItem(PATH_KEY) || '';
   }
 
   hasStartedGame(): boolean {
-    const gamePath = localStorage.getItem(this.PATH_KEY);
+    const gamePath = localStorage.getItem(PATH_KEY);
     return Boolean(gamePath);
   }
 
   storeGamePath(path: string, isServer: boolean): void {
-    localStorage.setItem(this.PATH_KEY, path);
-    localStorage.setItem(this.SERVER_KEY, JSON.stringify(isServer));
+    localStorage.setItem(PATH_KEY, path);
+    localStorage.setItem(SERVER_KEY, JSON.stringify(isServer));
   }
 
   initializeGame(path: string, isJoinGame: boolean = false): Promise<GameState> {
@@ -56,7 +56,7 @@ export class AppService {
   }
 
   getGameData(service: GameService): void {
-    const path = localStorage.getItem(this.PATH_KEY);
+    const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
@@ -72,7 +72,7 @@ export class AppService {
   }
 
   getGameDataOnce(): Observable<GameState> {
-    const path = localStorage.getItem(this.PATH_KEY);
+    const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
@@ -82,7 +82,7 @@ export class AppService {
   }
 
   pushGameData(data: WithFieldValue<DocumentData>): Promise<void> {
-    const path = localStorage.getItem(this.PATH_KEY);
+    const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
@@ -93,15 +93,15 @@ export class AppService {
 
   async removeGameData(gameService: GameService): Promise<void> {
     return new Promise<void>((resolve) => {
-       localStorage.removeItem(this.PATH_KEY);
-       localStorage.removeItem(this.SERVER_KEY);
-       gameService.pushGameData({ players: [], results: [] });
-       resolve();
+      localStorage.removeItem(PATH_KEY);
+      localStorage.removeItem(SERVER_KEY);
+      gameService.pushGameData({ players: [], results: [] });
+      resolve();
     });
   }
 
   async deleteGameData(gameService: GameService): Promise<void> {
-    const path = localStorage.getItem(this.PATH_KEY);
+    const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }

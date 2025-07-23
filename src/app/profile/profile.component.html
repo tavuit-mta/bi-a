@@ -1,0 +1,39 @@
+<div class="setup-container">
+    <mat-card>
+        <mat-card-title [ngStyle]="{'padding': '16px'}">Thiết lập tài khoản</mat-card-title>
+        <mat-card-content>
+            <form [formGroup]="profileForm" class="profile-form">
+                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
+                    <mat-label>Device ID</mat-label>
+                    <input matInput [formControlName]="'deviceId'" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
+                    <mat-label>Profile ID</mat-label>
+                    <input matInput [formControlName]="'profileId'" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
+                    <mat-label>Tên người chơi</mat-label>
+                    <input matInput [formControlName]="'username'" [maxlength]="15"/>
+                    <mat-error *ngIf="profileForm.get('username')?.hasError('required')">
+                        Vui lòng nhập tên.
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
+                    <mat-label>Số tài khoản</mat-label>
+                    <input matInput numberPattern type="number" [formControlName]="'bankAccount'" pattern="[0-9]*" [maxlength]="20" />
+                    <mat-error *ngIf="profileForm.get('bankAccount')?.hasError('required')">
+                        Vui lòng nhập số tài khoản.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </mat-card-content>
+        <mat-card-actions class="action-row">
+            <button mat-raised-button color="warn" (click)="onNavigateRouter()">
+                Cancel
+            </button>
+            <button mat-raised-button color="accent" [disabled]="profileForm.invalid" (click)="saveProfile()">
+                Lưu thiết lập
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>

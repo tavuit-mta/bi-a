@@ -22,6 +22,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Media, MediaSaveOptions } from '@capacitor-community/media';
 import { AppService } from '../../app.service';
 import { QrGameComponent } from '../qr-game/qr-game.component';
+import { Profile } from '../../models/profile.model';
 
 @Component({
   standalone: true,
@@ -120,7 +121,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
     // Generate a new unique id
     const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
-    const newPlayer: Player = { id: newId, name };
+    const newPlayer: Player = { id: newId, name, profileId: Profile.generateProfileId() };
 
     // Add player to GameService (which will update gameState and persist)
     this.gameService.addPlayer(newPlayer);
@@ -134,15 +135,15 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   // --- Remove Player Feature ---
-  removePlayer(player: Player, index: number): void {
-    if (this.gameState.players.length <= 2) {
-      alert('Cần ít nhất 2 người chơi.');
-      return;
-    }
-    const confirmed = confirm(`Bạn có chắc chắn muốn xóa người chơi "${player.name}"?`);
-    if (!confirmed) return;
-    this.gameService.removePlayer(player.id, index);
-  }
+  // removePlayer(player: Player, index: number): void {
+  //   if (this.gameState.players.length <= 2) {
+  //     alert('Cần ít nhất 2 người chơi.');
+  //     return;
+  //   }
+  //   const confirmed = confirm(`Bạn có chắc chắn muốn xóa người chơi "${player.name}"?`);
+  //   if (!confirmed) return;
+  //   this.gameService.removePlayer(player.id, index);
+  // }
 
   // --- Edit Game Feature ---
   editGame(result: GameResult, rowIndex: number): void {

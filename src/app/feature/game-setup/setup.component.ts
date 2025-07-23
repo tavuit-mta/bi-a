@@ -9,6 +9,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { ProfileService } from '../../core/services/profile.service';
+import { Profile } from '../../models/profile.model';
+import { combineLatest } from 'rxjs';
+import { AppService } from '../../app.service';
 
 @Component({
   standalone: true,
@@ -26,34 +30,48 @@ import { MatButtonModule } from '@angular/material/button';
     MatButtonModule
   ]
 })
-export class SetupComponent {
+export class SetupComponent implements OnInit {
 
   playerForm: ReturnType<FormBuilder['group']>;
+  isServerMode = false; // Flag to indicate if running in server mode
+  profile!: Profile;
 
   constructor(
     private fb: FormBuilder,
+    private appService: AppService,
     private gameService: GameService,
+    private profileService: ProfileService,
     private router: Router
   ) {
     this.playerForm = this.fb.group({
-      players: this.fb.array([
-        this.fb.control('', Validators.required),
-        this.fb.control('', Validators.required)
-      ])
+      players: this.fb.array([])
     });
-    this.gameService.gameState$.subscribe(state => {
-      if (state.players.length > 0) {
+    this.isServerMode = this.appService.isServer;
+    combineLatest([
+      this.gameService.gameState$,
+      this.profileService.getProfile()
+    ]).subscribe(([gameState, profile]) => {
+      this.profile = profile;
+      if (!profile || !profile.isComplete()) {
+        this.router.navigate(['/profile']);
+      } else if (gameState.players.some(p => p.name === profile.username)) {
         this.router.navigate(['/board']);
+      } else if (profile && profile.username) {
+        this.addPlayer(profile.username);
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.profileService.loadProfile();
   }
 
   get players() {
     return this.playerForm.get('players') as FormArray;
   }
 
-  addPlayer(): void {
-    this.players.push(this.fb.control('', Validators.required));
+  addPlayer(playerName: string): void {
+    this.players.push(this.fb.control({ value: playerName, disabled: true }));
   }
 
   removePlayer(index: number): void {
@@ -63,19 +81,28 @@ export class SetupComponent {
   }
 
   submit(): void {
-    if (this.playerForm.invalid) {
+    if (this.playerForm.invalid || !this.profile) {
       this.playerForm.markAllAsTouched();
       return;
     }
-
     const playerNames: string[] = this.players.value.filter((name: string) => !!name);
-
     const players: Player[] = playerNames.map((name, idx) => ({
       id: idx,
-      name
+      name,
+      profileId: this.profile.profileId // Associate player with profile
     }));
+    
+    if (this.isServerMode) {
+      this.gameService.setPlayers(players);
+    } else {
+      this.gameService.addPlayer(players[0]);
+      this.gameService.addPlayerToResults(players[0]);
+    }
 
-    this.gameService.setPlayers(players);
     this.router.navigate(['/board']);
+  }
+
+  editProfile(): void {
+    this.router.navigate(['/profile'], { queryParams: { fromSetup: true } });
   }
 }

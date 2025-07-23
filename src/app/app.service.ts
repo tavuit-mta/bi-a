@@ -82,6 +82,8 @@ export class AppService {
   }
 
   pushGameData(data: WithFieldValue<DocumentData>): Promise<void> {
+    console.log('Pushing game data to Firestore:', data);
+    
     const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');

@@ -91,13 +91,12 @@ export class SetupComponent implements OnInit {
     }
     const playerNames: string[] = this.players.value.filter((name: string) => !!name);
     const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
-    const players: PlayerModel[] = playerNames.map((name) => new PlayerModel(
-      newId,
+    const players: PlayerModel[] = playerNames.map((name) => new PlayerModel({
+      id: newId,
       name,
-      Profile.generateProfileId(),
-      Profile.generateRandomAvatar(),
-      true
-    ));
+      profileId: this.profile.profileId,
+      avatar: this.profile.avatarUrl || Profile.generateRandomAvatar(),
+    }));
 
     if (this.isServerMode) {
       this.gameService.setPlayers(players);

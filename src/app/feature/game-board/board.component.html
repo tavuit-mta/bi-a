@@ -34,7 +34,7 @@
           <!-- Player columns -->
           <ng-container *ngFor="let player of gameState.players; let i = index" [matColumnDef]="player.name">
             <th mat-header-cell *matHeaderCellDef class="fixed-col">
-              <mat-chip>
+              <mat-chip [disabled]="!player.active" (click)="player.changeStatus()">
                 <img matChipAvatar [src]="player.avatar" alt="{{ player.name }}" />
                 {{ player.name }}
               </mat-chip>

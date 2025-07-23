@@ -30,7 +30,11 @@ export class GameService {
 
   pushGameData(result: GameState): void {
     console.log('Pushing game data:', result);
-    this._gameState$.next(result);
+    const resultObject = {
+      results: result.results,
+      players: result.players.map(player => new PlayerModel({ ...player })) as PlayerModel[]
+    }
+    this._gameState$.next(resultObject);
   }
 
   setPlayers(players: PlayerModel[]): void {
@@ -111,7 +115,7 @@ export class GameService {
   }
 
   observeGameState(): void {
-    console.log('Observing game state from server...');    
+    console.log('Observing game state from server...');
     this.appService.getGameData(this);
   }
 
@@ -164,7 +168,9 @@ export class GameService {
       this.STORAGE_KEY,
       JSON.stringify(this._gameState$.value)
     );
-    this.appService.pushGameData(this._gameState$.value);
+    this.appService.pushGameData(
+      JSON.parse(JSON.stringify(this._gameState$.value))
+    );
   }
 
   private loadFromStorage(): void {

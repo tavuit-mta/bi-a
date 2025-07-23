@@ -124,13 +124,12 @@ export class BoardComponent implements OnInit, OnDestroy {
     // Generate a new unique id
     const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
 
-    const newPlayer: PlayerModel = new PlayerModel(
-      newId, 
-      name, 
-      Profile.generateProfileId(), 
-      Profile.generateRandomAvatar(), 
-      true
-    )
+    const newPlayer: PlayerModel = new PlayerModel({
+      id: newId,
+      name,
+      profileId: Profile.generateProfileId(),
+      avatar: Profile.generateRandomAvatar()
+    })
 
     // Add player to GameService (which will update gameState and persist)
     this.gameService.addPlayer(newPlayer);
@@ -142,17 +141,6 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.addPlayerName = '';
     this.addPlayerError = '';
   }
-
-  // --- Remove Player Feature ---
-  // removePlayer(player: Player, index: number): void {
-  //   if (this.gameState.players.length <= 2) {
-  //     alert('Cần ít nhất 2 người chơi.');
-  //     return;
-  //   }
-  //   const confirmed = confirm(`Bạn có chắc chắn muốn xóa người chơi "${player.name}"?`);
-  //   if (!confirmed) return;
-  //   this.gameService.removePlayer(player.id, index);
-  // }
 
   // --- Edit Game Feature ---
   editGame(result: GameResult, rowIndex: number): void {

@@ -1,8 +1,8 @@
-import { Player } from './player.model';
+import { Player, PlayerModel } from './player.model';
 import { GameResult } from './game-result.model';
 
 export interface GameState {
-  players: Player[];
+  players: PlayerModel[];
   results: GameResult[];
 }
 

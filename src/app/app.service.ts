@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { GameService } from './core/services/game.service';
 import { GameState } from './models/game-state.model';
 import moment from 'moment';
-import { FIREBASE_PATH, PATH_KEY, SERVER_KEY } from './core/constants/core.constant'; // Adjust the import path as necessary
+import { FIREBASE_PATH, GAME_STATE_KEY, PATH_KEY, SERVER_KEY } from './core/constants/core.constant'; // Adjust the import path as necessary
 
 @Injectable({
   providedIn: 'root'
@@ -67,6 +67,7 @@ export class AppService {
         const data = docSnap.data() as GameState;
         console.log('Received real-time data:', docSnap.data());
         service.pushGameData(data);
+        service.saveToStorage();
       }
     });
   }
@@ -97,7 +98,7 @@ export class AppService {
     return new Promise<void>((resolve) => {
       localStorage.removeItem(PATH_KEY);
       localStorage.removeItem(SERVER_KEY);
-      gameService.pushGameData({ players: [], results: [] });
+      localStorage.removeItem(GAME_STATE_KEY)
       resolve();
     });
   }

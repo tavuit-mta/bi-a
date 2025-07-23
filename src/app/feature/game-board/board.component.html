@@ -1,4 +1,4 @@
-<div id="board-container" class="board-container" *ngIf="gameState.players.length > 0">
+<div id="board-container" class="board-container">
   <mat-card>
     <mat-card-title class="board-title">
       <span>Kết quả ván đấu</span>
@@ -30,11 +30,11 @@
               </button>
             </td>
           </ng-container>
-
+          
           <!-- Player columns -->
-          <ng-container *ngFor="let player of gameState.players; let i = index" [matColumnDef]="player.name">
+          <ng-container *ngFor="let player of players; let i = index" [matColumnDef]="player.profileId">
             <th mat-header-cell *matHeaderCellDef class="fixed-col">
-              <mat-chip [disabled]="!player.active" (click)="changeStatus(player)">
+              <mat-chip [disabled]="!player.active">
                 <img matChipAvatar [src]="player.avatar" alt="{{ player.name }}" />
                 {{ player.name }}
               </mat-chip>
@@ -47,9 +47,9 @@
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="footerAndDisplayedColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; columns: footerAndDisplayedColumns"></tr>
-          <tr mat-footer-row *matFooterRowDef="footerAndDisplayedColumns" class="total-row"></tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          <tr mat-footer-row *matFooterRowDef="displayedColumns" class="total-row"></tr>
         </table>
       </div>
     </mat-card-content>

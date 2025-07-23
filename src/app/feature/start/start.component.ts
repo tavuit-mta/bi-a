@@ -143,6 +143,7 @@ export class StartComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    console.log('StartComponent destroyed');
     this.onDestroy$.next();
     this.onDestroy$.complete();
   }

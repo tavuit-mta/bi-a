@@ -4,13 +4,12 @@ import { GameState } from '../../models/game-state.model';
 import { Player, PlayerModel } from '../../models/player.model';
 import { GameResult, PenaltyDetail } from '../../models/game-result.model';
 import { AppService } from '../../app.service';
+import { GAME_STATE_KEY } from '../constants/core.constant';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
-  private readonly STORAGE_KEY = 'BILLIARD_SCORE_GAME_STATE';
-
   private _gameState$ = new BehaviorSubject<GameState>({
     players: [],
     results: []
@@ -44,6 +43,7 @@ export class GameService {
       ...current, 
       players
     };
+    console.log('Updating player:', player);
     this.pushGameData(newState);
     this.saveToStorage();
   }
@@ -54,6 +54,7 @@ export class GameService {
       ...current,
       players
     };
+    console.log('Saving players:', players);
     this.pushGameData(newState);
     this.saveToStorage();
   }
@@ -61,6 +62,7 @@ export class GameService {
   addPlayer(player: PlayerModel): void {
     const current = this._gameState$.value;
     const newPlayers = [...current.players, player];
+    console.log('Adding player:', player);
     this.setPlayers(newPlayers);
   }
 
@@ -80,6 +82,7 @@ export class GameService {
       ...current,
       results: newResults
     };
+    console.log('Adding player to results:', player);
     this.pushGameData(newState);
     this.saveToStorage();
   }
@@ -114,6 +117,7 @@ export class GameService {
       players: newPlayers,
       results: newResults
     };
+    console.log('Removing player:', playerId);
     this.pushGameData(newState);
     this.saveToStorage();
   }
@@ -136,6 +140,7 @@ export class GameService {
       ...current,
       results: [...current.results, result]
     };
+    console.log('Adding game result:', result);
     this.pushGameData(newState);
     this.saveToStorage();
   }
@@ -148,6 +153,7 @@ export class GameService {
       ...current,
       results: newResults
     };
+    console.log('Updating game result at index', index, ':', result);
     this.pushGameData(newState);
     this.saveToStorage();
   }
@@ -160,6 +166,7 @@ export class GameService {
       ...current,
       results: newResults
     };
+    console.log('Deleting game result at index', index);
     this.pushGameData(newState);
     this.saveToStorage();
   }
@@ -170,13 +177,13 @@ export class GameService {
       results: []
     };
     this.pushGameData(newState);
-    localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(GAME_STATE_KEY);
     this.appService.removeGameData(this);
   }
 
-  private saveToStorage(): void {
+  saveToStorage(): void {
     localStorage.setItem(
-      this.STORAGE_KEY,
+      GAME_STATE_KEY,
       JSON.stringify(this._gameState$.value)
     );
     this.appService.pushGameData(
@@ -185,7 +192,7 @@ export class GameService {
   }
 
   private loadFromStorage(): void {
-    const raw = localStorage.getItem(this.STORAGE_KEY);
+    const raw = localStorage.getItem(GAME_STATE_KEY);
     if (raw) {
       try {
         const data = JSON.parse(raw) as GameState;
@@ -199,6 +206,7 @@ export class GameService {
           penalties: result.penalties ?? [],
           remainingPoints: result.remainingPoints ?? []
         }));
+        console.log('Loaded game state from storage:', data);
         this.pushGameData(data);
       } catch {
         this.resetGame();

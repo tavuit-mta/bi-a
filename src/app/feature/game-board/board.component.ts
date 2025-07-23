@@ -1,13 +1,13 @@
 import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
 import { Player, PlayerModel } from '../../models/player.model';
 import { GameResult } from '../../models/game-result.model';
 import { AddGameDialogComponent } from '../add-game-dialog/add-game-dialog.component';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
+import { MatTable, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,6 +24,7 @@ import { AppService } from '../../app.service';
 import { QrGameComponent } from '../qr-game/qr-game.component';
 import { Profile } from '../../models/profile.model';
 import { MatChipsModule } from '@angular/material/chips';
+import { ProfileService } from '../../core/services/profile.service';
 
 @Component({
   standalone: true,
@@ -45,15 +46,16 @@ import { MatChipsModule } from '@angular/material/chips';
   ],
 })
 export class BoardComponent implements OnInit, OnDestroy {
+  onDestroy$: Subject<void> = new Subject<void>();
+
   gameState!: GameState;
   displayedColumns: string[] = [];
-  footerAndDisplayedColumns: string[] = [];
   totalScores: number[] = [];
   private sub!: Subscription;
 
   @ViewChild('tableWrapper', { static: false }) tableWrapper!: ElementRef<HTMLDivElement>;
+  @ViewChild('table', { static: false }) table!: MatTable<GameResult>;
 
-  // Add Player UI state
   showAddPlayerInput = false;
   addPlayerName = '';
   addPlayerError = '';
@@ -62,9 +64,16 @@ export class BoardComponent implements OnInit, OnDestroy {
   album = 'BilliardScore';
   isServerMode = false;
 
+  currentProfile!: Profile;
+
+  get players(): PlayerModel[] {     
+    return this.gameState.players.map(p => new PlayerModel({ ...p })) as PlayerModel[];
+  }
+
   constructor(
     private appService: AppService,
     private gameService: GameService,
+    private profileService: ProfileService,
     private dialog: MatDialog,
     private router: Router,
     private renderer: Renderer2,
@@ -74,16 +83,33 @@ export class BoardComponent implements OnInit, OnDestroy {
     if (this.gameService.getPlayers().length === 0) {
       this.router.navigate(['/']);
     }
+    this.profileService.getProfile()
+      .pipe(takeUntil(this.onDestroy$))
+      .subscribe((profile: Profile) => {
+        this.currentProfile = profile;
+      });
+    this.profileService.loadProfile();
   }
 
   ngOnInit(): void {
-    this.gameService.observeGameState();
-    this.sub = this.gameService.gameState$.subscribe(state => {
-      this.gameState = state;
-      this.displayedColumns = state.players.map(p => p.name);
-      this.footerAndDisplayedColumns = [...this.displayedColumns, 'sumLabel'];
+    this.gameService.gameState$
+    .pipe(takeUntil(this.onDestroy$))
+    .subscribe(state => {
+      this.gameState = {
+        players: state.players.map((p: PlayerModel) => ({...p} as PlayerModel)),
+        results: [...state.results]
+      };
+
+      console.log('BoardComponent received game state:', this.gameState);
+
+      const displayedColumns = this.gameState.players.map(p => p.profileId);
+      this.displayedColumns = [...displayedColumns, 'sumLabel'];
+      this.cdr.detectChanges();
+      this.table?.renderRows();
+
       this.calculateTotals();
     });
+    this.gameService.observeGameState();
   }
 
   toggleTotalRow(): void {
@@ -174,10 +200,14 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   outGame(): void {
-    this.appService.removeGameData(this.gameService).then(() => {
-      this.router.navigate(['/']);
-    });
-
+    const currentPlayer = this.gameState.players.find(p => p.profileId === this.currentProfile.profileId);
+    if (currentPlayer) {
+      currentPlayer.inactivePlayer();
+      this.gameService.putPlayer(currentPlayer);
+      this.appService.removeGameData(this.gameService).then(() => {
+        this.router.navigate(['/']);
+      }); 
+    }
   }
 
   async exportTableAsPngIonic(): Promise<void> {
@@ -287,7 +317,6 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   getScore(player: PlayerModel, result: GameResult): number {
-
     const playerIndex = result.players.findIndex(p => p.id === player.id);
     if (playerIndex === -1) {
       return 0;
@@ -295,16 +324,13 @@ export class BoardComponent implements OnInit, OnDestroy {
     return result.scores[playerIndex] || 0;
   }
 
-  changeStatus(player: PlayerModel): void {
-    player.inactivePlayer();
-    this.gameService.putPlayer(player);
-  }
-
   public showQrCode(): void {
     this.dialog.open(QrGameComponent);
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    console.log('BoardComponent destroyed');
+    this.onDestroy$.next();
+    this.onDestroy$.complete();
   }
 }

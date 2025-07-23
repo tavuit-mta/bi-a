@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ProfileService } from '../../core/services/profile.service';
 import { Profile } from '../../models/profile.model';
-import { combineLatest } from 'rxjs';
+import { combineLatest, distinct, Subject, takeUntil } from 'rxjs';
 import { AppService } from '../../app.service';
 import { GameState } from '../../models/game-state.model';
 
@@ -31,8 +31,8 @@ import { GameState } from '../../models/game-state.model';
     MatButtonModule
   ]
 })
-export class SetupComponent implements OnInit {
-
+export class SetupComponent implements OnInit, OnDestroy {
+  onDestroy$: Subject<void> = new Subject<void>();
   playerForm: ReturnType<FormBuilder['group']>;
   isServerMode = false; // Flag to indicate if running in server mode
   profile!: Profile;
@@ -52,14 +52,26 @@ export class SetupComponent implements OnInit {
     combineLatest([
       this.gameService.gameState$,
       this.profileService.getProfile()
-    ]).subscribe(([gameState, profile]) => {
+    ])
+    .pipe(
+      takeUntil(this.onDestroy$),
+      distinct(([gameState, profile]) => profile.profileId)
+    )
+    .subscribe(([gameState, profile]) => {
+      console.log('SetupComponent received game state and profile:', gameState, profile);
+      
       this.profile = profile;
       this.gameState = gameState;
 
       if (!profile || !profile.isComplete()) {
         this.router.navigate(['/profile']);
       } else if (gameState.players.some(p => p.profileId === profile.profileId)) {
-        this.router.navigate(['/board']);
+        const currentPlayer = gameState.players.find(p => p.profileId === profile.profileId);
+        if (currentPlayer) {
+          currentPlayer.activePlayer();
+          this.gameService.putPlayer(currentPlayer);
+          this.router.navigate(['/board']);
+        }
       } else if (profile && profile.username) {
         this.addPlayer(profile.username);
       }
@@ -114,5 +126,11 @@ export class SetupComponent implements OnInit {
 
   view(): void {
     this.router.navigate(['/board']);
+  }
+  
+  ngOnDestroy(): void {
+    console.log('SetupComponent destroyed');
+    this.onDestroy$.next();
+    this.onDestroy$.complete();
   }
 }

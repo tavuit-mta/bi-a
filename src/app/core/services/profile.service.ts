@@ -26,6 +26,7 @@ export class ProfileService {
     }
 
     public loadProfile(): void {
+        console.log('Loading profile from local storage...');
         const deviceId = Profile.getDeviceId();
         const profile = Profile.loadFromLocalStorage(deviceId);
         if (profile) {

@@ -13,14 +13,13 @@
               <input matInput [formControlName]="i" />
             </mat-form-field>
 
-            <!-- <button
+            <button
               mat-icon-button
               color="warn"
-              (click)="removePlayer(i)"
-              *ngIf="players.length > 2"
+              (click)="editProfile()"
             >
-              <mat-icon>delete</mat-icon>
-            </button> -->
+              <mat-icon>edit</mat-icon>
+            </button>
           </div>
         </div>
       </form>
@@ -31,10 +30,10 @@
     <mat-card-actions class="action-row">
       <button
         mat-raised-button
-        color="accent"
-        (click)="editProfile()"
+        color="warn"
+        (click)="cancel()"
       >
-        Sửa profile
+        Cancel
       </button>
       <button
         mat-raised-button

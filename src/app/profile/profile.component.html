@@ -3,11 +3,11 @@
         <mat-card-title [ngStyle]="{'padding': '16px'}">Thiết lập tài khoản</mat-card-title>
         <mat-card-content>
             <form [formGroup]="profileForm" class="profile-form">
-                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
+                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic" style="display: none;">
                     <mat-label>Device ID</mat-label>
                     <input matInput [formControlName]="'deviceId'" />
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
+                <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic" style="display: none;">
                     <mat-label>Profile ID</mat-label>
                     <input matInput [formControlName]="'profileId'" />
                 </mat-form-field>

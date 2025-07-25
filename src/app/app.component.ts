@@ -18,10 +18,5 @@ export class AppComponent {
       profile.saveToLocalStorage();
       this.profileService.setIsCompleteProfile(profile.isComplete());
     });
-    
-    this.profileService.loadProfile();
-    if (!this.profileService.isCompleteProfile) {
-      this.router.navigate(['/profile']);
-    }
   }
 }

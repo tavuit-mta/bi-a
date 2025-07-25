@@ -129,6 +129,10 @@ export class SetupComponent implements OnInit, OnDestroy {
     this.router.navigate(['/board']);
   }
 
+  cancel(): void {
+    this.router.navigate(['/']);
+  }
+
   ngOnDestroy(): void {
     console.log('SetupComponent destroyed');
     this.onDestroy$.next();

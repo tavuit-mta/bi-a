@@ -98,7 +98,7 @@ export class AppService {
     return new Promise<void>((resolve) => {
       localStorage.removeItem(PATH_KEY);
       localStorage.removeItem(SERVER_KEY);
-      localStorage.removeItem(GAME_STATE_KEY)
+      localStorage.removeItem(GAME_STATE_KEY);
       resolve();
     });
   }

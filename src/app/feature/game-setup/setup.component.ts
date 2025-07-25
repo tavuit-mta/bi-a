@@ -53,29 +53,29 @@ export class SetupComponent implements OnInit, OnDestroy {
       this.gameService.gameState$,
       this.profileService.getProfile()
     ])
-    .pipe(
-      takeUntil(this.onDestroy$),
-      distinct(([gameState, profile]) => profile.profileId)
-    )
-    .subscribe(([gameState, profile]) => {
-      console.log('SetupComponent received game state and profile:', gameState, profile);
-      
-      this.profile = profile;
-      this.gameState = gameState;
+      .pipe(
+        takeUntil(this.onDestroy$),
+        distinct(([gameState, profile]) => profile.profileId)
+      )
+      .subscribe(([gameState, profile]) => {
+        console.log('SetupComponent received game state and profile:', gameState, profile);
 
-      if (!profile || !profile.isComplete()) {
-        this.router.navigate(['/profile']);
-      } else if (gameState.players.some(p => p.profileId === profile.profileId)) {
-        const currentPlayer = gameState.players.find(p => p.profileId === profile.profileId);
-        if (currentPlayer) {
-          currentPlayer.activePlayer();
-          this.gameService.putPlayer(currentPlayer);
-          this.router.navigate(['/board']);
+        this.profile = profile;
+        this.gameState = gameState;
+
+        if (!profile || !profile.isComplete()) {
+          this.router.navigate(['/profile']);
+        } else if (gameState.players.some(p => p.profileId === profile.profileId)) {
+          const currentPlayer = gameState.players.find(p => p.profileId === profile.profileId);
+          if (currentPlayer) {
+            currentPlayer.activePlayer();
+            this.gameService.putPlayer(currentPlayer);
+            this.router.navigate(['/board']);
+          }
+        } else if (profile && profile.username) {
+          this.addPlayer(profile.username);
         }
-      } else if (profile && profile.username) {
-        this.addPlayer(profile.username);
-      }
-    });
+      });
   }
 
   ngOnInit(): void {
@@ -102,9 +102,8 @@ export class SetupComponent implements OnInit, OnDestroy {
       return;
     }
     const playerNames: string[] = this.players.value.filter((name: string) => !!name);
-    const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
     const players: PlayerModel[] = playerNames.map((name) => new PlayerModel({
-      id: newId,
+      id: 0,
       name,
       profileId: this.profile.profileId,
       avatar: this.profile.avatarUrl || Profile.generateRandomAvatar(),
@@ -113,6 +112,8 @@ export class SetupComponent implements OnInit, OnDestroy {
     if (this.isServerMode) {
       this.gameService.setPlayers(players);
     } else {
+      const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
+      players[0].id = newId;
       this.gameService.addPlayer(players[0]);
       this.gameService.addPlayerToResults(players[0]);
     }
@@ -127,7 +128,7 @@ export class SetupComponent implements OnInit, OnDestroy {
   view(): void {
     this.router.navigate(['/board']);
   }
-  
+
   ngOnDestroy(): void {
     console.log('SetupComponent destroyed');
     this.onDestroy$.next();

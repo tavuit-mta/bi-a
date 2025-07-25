@@ -54,7 +54,6 @@ export class BoardComponent implements OnInit, OnDestroy {
   private sub!: Subscription;
 
   @ViewChild('tableWrapper', { static: false }) tableWrapper!: ElementRef<HTMLDivElement>;
-  @ViewChild('table', { static: false }) table!: MatTable<GameResult>;
 
   showAddPlayerInput = false;
   addPlayerName = '';
@@ -66,7 +65,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   currentProfile!: Profile;
 
-  get players(): PlayerModel[] {     
+  get players(): PlayerModel[] {
     return this.gameState.players.map(p => new PlayerModel({ ...p })) as PlayerModel[];
   }
 
@@ -93,23 +92,24 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.gameService.gameState$
-    .pipe(takeUntil(this.onDestroy$))
-    .subscribe(state => {
-      this.gameState = {
-        players: state.players.map((p: PlayerModel) => ({...p} as PlayerModel)),
-        results: [...state.results]
-      };
+      .pipe(takeUntil(this.onDestroy$))
+      .subscribe(state => {
+        this.gameState = {
+          players: state.players.map((p: PlayerModel) => ({ ...p } as PlayerModel)),
+          results: [...state.results]
+        };
 
-      console.log('BoardComponent received game state:', this.gameState);
+        const displayedColumns = this.gameState.players.map(p => this.columnKeyBuilder(p));
+        this.displayedColumns = [...displayedColumns, 'sumLabel'];
 
-      const displayedColumns = this.gameState.players.map(p => p.profileId);
-      this.displayedColumns = [...displayedColumns, 'sumLabel'];
-      this.cdr.detectChanges();
-      this.table?.renderRows();
 
-      this.calculateTotals();
-    });
+        this.calculateTotals();
+      });
     this.gameService.observeGameState();
+  }
+
+  columnKeyBuilder(player: PlayerModel): string {
+    return JSON.stringify(player);
   }
 
   toggleTotalRow(): void {
@@ -200,13 +200,20 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   outGame(): void {
-    const currentPlayer = this.gameState.players.find(p => p.profileId === this.currentProfile.profileId);
+    const currentPlayer = this.players.find(p => p.profileId === this.currentProfile.profileId);
     if (currentPlayer) {
       currentPlayer.inactivePlayer();
       this.gameService.putPlayer(currentPlayer);
-      this.appService.removeGameData(this.gameService).then(() => {
-        this.router.navigate(['/']);
-      }); 
+      const newState: GameState = {
+        players: [],
+        results: []
+      };
+      this.gameService.pushGameData(newState);
+      setTimeout(()=>{
+        this.appService.removeGameData(this.gameService).then(() => {
+          this.router.navigate(['/']);
+        });
+      }, 1000);
     }
   }
 

@@ -136,13 +136,16 @@ export class AddGameDialogComponent implements OnInit {
   }
 
   private rebuildForm(existingResult?: GameResult): void {
+    console.log('Result to rebuild form:', existingResult);
+    
     this.form = this.fb.group({
       winner: [null, Validators.required],
       losers: this.fb.group({}),
       extended: this.fb.array([]),
       remainingTiles: this.fb.array([])
     });
-
+    console.log('players in rebuildForm:', this.players);
+    
     this.players.forEach((player, idx) => {
       (this.form.get('losers') as FormGroup).addControl(
         player.id.toString(),
@@ -166,7 +169,7 @@ export class AddGameDialogComponent implements OnInit {
         new FormControl(0, Validators.min(0))
       );
     });
-
+    
     this.sortedPlayerIndexes = this.players.map((_, idx) => idx);
     
     if (this.modelMode === ModalMode.View) {

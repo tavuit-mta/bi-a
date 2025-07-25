@@ -32,7 +32,7 @@
           </ng-container>
           
           <!-- Player columns -->
-          <ng-container *ngFor="let player of players; let i = index" [matColumnDef]="player.profileId">
+          <ng-container *ngFor="let player of players; let i = index" [matColumnDef]="columnKeyBuilder(player)">
             <th mat-header-cell *matHeaderCellDef class="fixed-col">
               <mat-chip [disabled]="!player.active">
                 <img matChipAvatar [src]="player.avatar" alt="{{ player.name }}" />

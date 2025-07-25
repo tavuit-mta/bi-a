@@ -11,6 +11,10 @@
     Tham gia chơi
   </button>
 
+  <button mat-raised-button color="primary" *ngIf="!startScanning">
+    <a [href]="downloadApp()">Download app</a>
+  </button>
+
   <div *ngIf="startScanning" class="scan-overlay">
     <div class="scan-box"></div>
     

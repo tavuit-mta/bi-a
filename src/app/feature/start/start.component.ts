@@ -14,6 +14,7 @@ import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { ProfileService } from '../../core/services/profile.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   standalone: true,
@@ -39,11 +40,13 @@ export class StartComponent implements OnDestroy {
   startScanning = false;
   // This binds the 'scanner-active' class to the host element (<app-your-page>)
   @HostBinding('class.scanner-active') scannerActive = false;
+  private manifestUrl = 'https://raw.githubusercontent.com/tavuit-mta/bi-a/refs/heads/main/BilliardScore/manifest.plist';
 
   constructor(
     private router: Router,
     private appService: AppService,
     private gameService: GameService,
+    private sanitizer: DomSanitizer
   ) {
     if (this.appService.hasStartedGame()) {
       console.log('Game already started, redirecting to setup...');
@@ -140,6 +143,12 @@ export class StartComponent implements OnDestroy {
   cancelJoinGame(): void {
     this.showJoinGame = false;
     this.joinGameCode = '';
+  }
+
+  downloadApp(): SafeUrl {
+    const url = `itms-services://?action=download-manifest&url=${this.manifestUrl}`;
+    // Bỏ qua kiểm tra bảo mật của Angular cho URL itms-services
+    return this.sanitizer.bypassSecurityTrustUrl(url);
   }
 
   ngOnDestroy(): void {

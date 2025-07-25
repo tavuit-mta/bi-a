@@ -11,7 +11,7 @@
 					<key>kind</key>
 					<string>software-package</string>
 					<key>url</key>
-					<string>https://tavuit-mta.github.io/bi-a/download/Billiard Score.ipa</string>
+					<string>https://raw.githubusercontent.com/tavuit-mta/bi-a/refs/heads/main/BilliardScore/Apps/Billiard%20Score.ipa</string>
 				</dict>
 				<dict>
 					<key>kind</key>
@@ -39,7 +39,7 @@
 				<key>title</key>
 				<string>Billiard Score</string>
 			</dict>
-			<key>thinned-assets</key>
+			<!-- <key>thinned-assets</key>
 			<array>
 				<dict>
 					<key>bundle-identifier</key>
@@ -3346,7 +3346,7 @@
 						<string>iPhone11,4</string>
 					</array>
 				</dict>
-			</array>
+			</array> -->
 		</dict>
 	</array>
 </dict>

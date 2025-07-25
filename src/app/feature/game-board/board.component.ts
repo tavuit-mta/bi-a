@@ -25,6 +25,7 @@ import { QrGameComponent } from '../qr-game/qr-game.component';
 import { Profile } from '../../models/profile.model';
 import { MatChipsModule } from '@angular/material/chips';
 import { ProfileService } from '../../core/services/profile.service';
+import { Unsubscribe } from '@angular/fire/firestore';
 
 @Component({
   standalone: true,
@@ -64,6 +65,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   isServerMode = false;
 
   currentProfile!: Profile;
+  private gameDataSubscription: Unsubscribe | undefined;
 
   get players(): PlayerModel[] {
     return this.gameState.players.map(p => new PlayerModel({ ...p })) as PlayerModel[];
@@ -105,7 +107,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
         this.calculateTotals();
       });
-    this.gameService.observeGameState();
+    this.gameDataSubscription =this.gameService.observeGameState();
   }
 
   columnKeyBuilder(player: PlayerModel): string {
@@ -200,6 +202,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   outGame(): void {
+    this.gameDataSubscription?.();
     const currentPlayer = this.players.find(p => p.profileId === this.currentProfile.profileId);
     if (currentPlayer) {
       currentPlayer.inactivePlayer();

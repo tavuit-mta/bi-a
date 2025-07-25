@@ -5,6 +5,7 @@ import { Player, PlayerModel } from '../../models/player.model';
 import { GameResult, PenaltyDetail } from '../../models/game-result.model';
 import { AppService } from '../../app.service';
 import { GAME_STATE_KEY } from '../constants/core.constant';
+import { Unsubscribe } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -30,8 +31,8 @@ export class GameService {
   pushGameData(result: GameState): void {
     console.log('Pushing game data:', result);
     const resultObject = {
-      results: result.results,
-      players: result.players.map(player => new PlayerModel({ ...player })) as PlayerModel[]
+      results: result?.results,
+      players: (result?.players || []).map(player => new PlayerModel({ ...player })) as PlayerModel[]
     }
     this._gameState$.next(resultObject);
   }
@@ -129,9 +130,9 @@ export class GameService {
     })
   }
 
-  observeGameState(): void {
+  observeGameState(): Unsubscribe {
     console.log('Observing game state from server...');
-    this.appService.getGameData(this);
+    return this.appService.getGameData(this);
   }
 
   addGameResult(result: GameResult): void {

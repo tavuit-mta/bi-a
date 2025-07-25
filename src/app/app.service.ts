@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { deleteDoc, doc, docData, DocumentData, Firestore, getDoc, onSnapshot, setDoc, updateDoc, WithFieldValue } from '@angular/fire/firestore';
+import { deleteDoc, doc, docData, DocumentData, Firestore, getDoc, onSnapshot, setDoc, Unsubscribe, updateDoc, WithFieldValue } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { GameService } from './core/services/game.service';
 import { GameState } from './models/game-state.model';
@@ -55,14 +55,14 @@ export class AppService {
     });
   }
 
-  getGameData(service: GameService): void {
+  getGameData(service: GameService): Unsubscribe {
     const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
     const basePath = this.gamePath;
     const documentRef = doc(this.firestore, basePath, path);
-    onSnapshot(documentRef, (docSnap) => {
+    return onSnapshot(documentRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data() as GameState;
         console.log('Received real-time data:', docSnap.data());

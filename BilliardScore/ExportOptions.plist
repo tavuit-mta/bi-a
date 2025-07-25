@@ -7,11 +7,11 @@
 	<key>manifest</key>
 	<dict>
 		<key>appURL</key>
-		<string>https://tavuit-mta.github.io/bi-a/download/Billiard Score.ipa</string>
+		<string>https://raw.githubusercontent.com/tavuit-mta/bi-a/refs/heads/main/BilliardScore/BilliardScore.png</string>
 		<key>displayImageURL</key>
-		<string>https://tavuit-mta.github.io/bi-a/Billiard-Score.png</string>
+		<string>https://raw.githubusercontent.com/tavuit-mta/bi-a/refs/heads/main/BilliardScore/BilliardScore.png</string>
 		<key>fullSizeImageURL</key>
-		<string>https://tavuit-mta.github.io/bi-a/Billiard-Score.png</string>
+		<string>https://raw.githubusercontent.com/tavuit-mta/bi-a/refs/heads/main/BilliardScore/BilliardScore.png</string>
 	</dict>
 	<key>method</key>
 	<string>release-testing</string>
@@ -22,6 +22,6 @@
 	<key>teamID</key>
 	<string>4DKKR75KL5</string>
 	<key>thinning</key>
-	<string>&lt;thin-for-all-variants&gt;</string>
+	<string>&lt;none&gt;</string>
 </dict>
 </plist>

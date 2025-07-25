@@ -11,9 +11,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ProfileService } from '../../core/services/profile.service';
 import { Profile } from '../../models/profile.model';
-import { combineLatest, distinct, Subject, takeUntil } from 'rxjs';
+import { combineLatest, distinct, Observable, Subject, takeUntil } from 'rxjs';
 import { AppService } from '../../app.service';
 import { GameState } from '../../models/game-state.model';
+import { NgxCurrencyDirective } from "ngx-currency";
 
 @Component({
   standalone: true,
@@ -28,7 +29,8 @@ import { GameState } from '../../models/game-state.model';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    NgxCurrencyDirective
   ]
 })
 export class SetupComponent implements OnInit, OnDestroy {
@@ -37,6 +39,14 @@ export class SetupComponent implements OnInit, OnDestroy {
   isServerMode = false; // Flag to indicate if running in server mode
   profile!: Profile;
   gameState!: GameState;
+
+  get gameUnit(): Observable<number> {
+    return this.gameService.unit$;
+  }
+
+  set gameUnit(value: number) {
+    this.gameService.setGameUnit(value);
+  }
 
   constructor(
     private fb: FormBuilder,

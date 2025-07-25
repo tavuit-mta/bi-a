@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { GameState } from '../../models/game-state.model';
 import { Player, PlayerModel } from '../../models/player.model';
 import { GameResult, PenaltyDetail } from '../../models/game-result.model';
 import { AppService } from '../../app.service';
-import { GAME_STATE_KEY } from '../constants/core.constant';
+import { CURRENCY_NUMBER_KEY, GAME_STATE_KEY } from '../constants/core.constant';
 import { Unsubscribe } from '@angular/fire/firestore';
 
 @Injectable({
@@ -16,12 +16,20 @@ export class GameService {
     results: []
   });
 
+  private _unit$ = new BehaviorSubject<number>(0);
+
+  public unit$ = this._unit$.asObservable();
   public gameState$ = this._gameState$.asObservable();
 
   constructor(
     private appService: AppService
   ) {
     this.loadFromStorage();
+  }
+
+  setGameUnit(unit: number): void {
+    localStorage.setItem(CURRENCY_NUMBER_KEY, unit.toString());
+    this._unit$.next(unit);
   }
 
   getPlayers(): Player[] {
@@ -192,7 +200,7 @@ export class GameService {
     );
   }
 
-  private loadFromStorage(): void {
+  loadFromStorage(): void {
     const raw = localStorage.getItem(GAME_STATE_KEY);
     if (raw) {
       try {
@@ -213,5 +221,62 @@ export class GameService {
         this.resetGame();
       }
     }
+    const unit = localStorage.getItem(CURRENCY_NUMBER_KEY);
+    if (unit) {
+      this._unit$.next(Number(unit));
+      console.log('Loaded game unit from storage:', unit);
+    }
+  }
+
+  /**
+ * Tính toán các giao dịch cần thiết để cân bằng điểm số của người chơi.
+ * @param {Object} scores - Một object với key là tên người chơi và value là điểm số.
+ * @returns {Array<string>} - Một mảng chứa các chuỗi mô tả giao dịch.
+ */
+  calculateTransactions(scores: {[key: string]: number}): string[] {
+    // 1. Tách người chơi thành hai nhóm: nợ (điểm âm) và nhận (điểm dương)
+    const debtors = Object.entries(scores)
+      .filter(([name, score]) => score < 0)
+      .map(([name, score]) => ({ name, amount: -score })); // Chuyển điểm âm thành số dương để tính toán
+
+    const creditors = Object.entries(scores)
+      .filter(([name, score]) => score > 0)
+      .map(([name, score]) => ({ name, amount: score }));
+
+    const transactions = [];
+
+    // 2. Xử lý giao dịch cho đến khi không còn ai nợ hoặc không còn ai cần nhận
+    while (debtors.length > 0 && creditors.length > 0) {
+      const debtor = debtors[0];
+      const creditor = creditors[0];
+
+      // 3. Xác định số tiền chuyển là số nhỏ hơn giữa số nợ và số cần nhận
+      const amountToTransfer = Math.min(debtor.amount, creditor.amount);
+
+      const numberToTransfer = new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amountToTransfer * this._unit$.value);
+
+      // Ghi nhận giao dịch
+      transactions.push(`
+        ${debtor.name} chuyển cho ${creditor.name}: ${numberToTransfer}
+      `);
+
+      // 4. Cập nhật lại số tiền của người nợ và người nhận
+      debtor.amount -= amountToTransfer;
+      creditor.amount -= amountToTransfer;
+
+      // 5. Nếu ai đã hết nợ hoặc nhận đủ, loại bỏ họ khỏi danh sách xử lý
+      if (debtor.amount === 0) {
+        debtors.shift(); // Xóa người nợ đầu tiên khỏi mảng
+      }
+      if (creditor.amount === 0) {
+        creditors.shift(); // Xóa người nhận đầu tiên khỏi mảng
+      }
+    }
+    return transactions;
   }
 }

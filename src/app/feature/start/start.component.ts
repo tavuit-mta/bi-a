@@ -13,7 +13,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { ProfileService } from '../../core/services/profile.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
@@ -83,7 +82,9 @@ export class StartComponent implements OnDestroy {
       this.startScanning = true;
       this.scannerActive = true;
 
-      const result = await BarcodeScanner.startScan();
+      const result = await BarcodeScanner.startScan({
+        cameraDirection: 'back'
+      });
 
       if (result.hasContent) {
         this.startScanning = false;

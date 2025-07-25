@@ -26,6 +26,7 @@ import { Profile } from '../../models/profile.model';
 import { MatChipsModule } from '@angular/material/chips';
 import { ProfileService } from '../../core/services/profile.service';
 import { Unsubscribe } from '@angular/fire/firestore';
+import { TransactionComponent } from '../transaction/transaction.component';
 
 @Component({
   standalone: true,
@@ -52,6 +53,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   gameState!: GameState;
   displayedColumns: string[] = [];
   totalScores: number[] = [];
+  playerScores: Record<string, number> = {};
   private sub!: Subscription;
 
   @ViewChild('tableWrapper', { static: false }) tableWrapper!: ElementRef<HTMLDivElement>;
@@ -311,14 +313,19 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
     const numPlayers = this.gameState.players.length;
     const totals = new Array(numPlayers).fill(0);
+    
+    this.playerScores = this.gameState.players.map(p => p.name).reduce((acc: Record<string, number>, name) => {
+      acc[name] = 0;
+      return acc;
+    }, {} as Record<string, number>);
 
     if (this.gameState.results && this.gameState.results.length) {
       for (const result of this.gameState.results) {
         for (let i = 0; i < numPlayers; i++) {
-          // totals[i] += result.scores[i] || 0;
           var playerIndex = result.players.findIndex(p => p.id === this.gameState.players[i].id);
           if (playerIndex !== -1) {
             totals[i] += result.scores[playerIndex] || 0;
+            this.playerScores[this.gameState.players[i].name] += result.scores[playerIndex] || 0;
           }
         }
       }
@@ -332,6 +339,15 @@ export class BoardComponent implements OnInit, OnDestroy {
       return 0;
     }
     return result.scores[playerIndex] || 0;
+  }
+
+  public calculateTransactions(): void {
+    const transactions = this.gameService.calculateTransactions(this.playerScores);
+    this.dialog.open(TransactionComponent, {
+      data: {
+        transactions: transactions,
+      }
+    });
   }
 
   public showQrCode(): void {

@@ -1,0 +1,22 @@
+// Card style
+.transaction-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  padding: 20px;
+  background: #fff;
+}
+
+mat-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+mat-list-item {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+}
+
+mat-list-item:last-child {
+  border-bottom: none;
+}

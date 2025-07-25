@@ -1,0 +1,10 @@
+<mat-card class="transaction-card">
+  <mat-card-title style="padding: 0 16px;">Danh sách giao dịch</mat-card-title>
+  <mat-card-content>
+    <mat-list>
+      <mat-list-item *ngFor="let transaction of transactions">
+        {{ transaction }}
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
+</mat-card>

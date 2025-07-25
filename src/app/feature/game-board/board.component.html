@@ -2,9 +2,14 @@
   <mat-card>
     <mat-card-title class="board-title">
       <span>Kết quả ván đấu</span>
-      <button mat-icon-button (click)="showQrCode()">
+      <div>
+        <button mat-icon-button (click)="showQrCode()">
         <mat-icon>qr_code</mat-icon>
       </button>
+      <button mat-icon-button (click)="calculateTransactions()">
+        <mat-icon>paid</mat-icon>
+      </button>
+      </div>
     </mat-card-title>
 
     <mat-card-content class="board-content">

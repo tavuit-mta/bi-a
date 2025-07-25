@@ -1,7 +1,7 @@
 <div class="setup-container">
   <mat-card>
     <mat-card-title [ngStyle]="{'padding': '16px'}">Thiết lập người chơi</mat-card-title>
-    <mat-card-content>
+    <mat-card-content class="setup-content">
       <form [formGroup]="playerForm">
         <div class="players-list">
           <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
@@ -11,9 +11,10 @@
           </mat-form-field>
         </div>
       </form>
-      <!-- <button mat-button color="primary" (click)="addPlayer()">
-        <mat-icon>add</mat-icon> Thêm người chơi
-      </button> -->
+      <mat-form-field appearance="outline" class="player-input" subscriptSizing="dynamic">
+        <mat-label>Đơn vị</mat-label>
+        <input matInput [currencyMask]="{ prefix: '', suffix: ' VNĐ', precision: 0 }" [ngModel]="gameUnit | async" (ngModelChange)="gameUnit = $event"/>
+      </mat-form-field>
     </mat-card-content>
     <mat-card-actions class="action-row">
       <button mat-raised-button color="warn" (click)="cancel()">

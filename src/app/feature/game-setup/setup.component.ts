@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
 import { Player, PlayerModel } from '../../models/player.model';
@@ -46,7 +46,7 @@ export class SetupComponent implements OnInit, OnDestroy {
     private router: Router
   ) {
     this.playerForm = this.fb.group({
-      players: this.fb.array([])
+      player: new FormControl({value: null, disabled: true}, [Validators.required]),
     });
     this.isServerMode = this.appService.isServer;
     combineLatest([
@@ -58,11 +58,11 @@ export class SetupComponent implements OnInit, OnDestroy {
         distinct(([gameState, profile]) => profile.profileId)
       )
       .subscribe(([gameState, profile]) => {
-        console.log('SetupComponent received game state and profile:', gameState, profile);
-
         this.profile = profile;
         this.gameState = gameState;
-
+        console.log('Game state:', gameState);
+        console.log('Profile:', profile);
+        
         if (!profile || !profile.isComplete()) {
           this.router.navigate(['/profile']);
         } else if (gameState.players.some(p => p.profileId === profile.profileId)) {
@@ -82,18 +82,12 @@ export class SetupComponent implements OnInit, OnDestroy {
     this.profileService.loadProfile();
   }
 
-  get players() {
-    return this.playerForm.get('players') as FormArray;
+  get player() {
+    return this.playerForm.get('player') as FormControl;
   }
 
   addPlayer(playerName: string): void {
-    this.players.push(this.fb.control({ value: playerName, disabled: true }));
-  }
-
-  removePlayer(index: number): void {
-    if (this.players.length > 2) {
-      this.players.removeAt(index);
-    }
+    this.player.setValue(playerName);
   }
 
   submit(): void {
@@ -101,21 +95,21 @@ export class SetupComponent implements OnInit, OnDestroy {
       this.playerForm.markAllAsTouched();
       return;
     }
-    const playerNames: string[] = this.players.value.filter((name: string) => !!name);
-    const players: PlayerModel[] = playerNames.map((name) => new PlayerModel({
+    const playerName: string = this.player.value?.trim();
+    const player: PlayerModel = new PlayerModel({
       id: 0,
-      name,
+      name: playerName,
       profileId: this.profile.profileId,
       avatar: this.profile.avatarUrl || Profile.generateRandomAvatar(),
-    }));
+    })
 
     if (this.isServerMode) {
-      this.gameService.setPlayers(players);
+      this.gameService.setPlayers([player]);
     } else {
       const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
-      players[0].id = newId;
-      this.gameService.addPlayer(players[0]);
-      this.gameService.addPlayerToResults(players[0]);
+      player.id = newId;
+      this.gameService.addPlayer(player);
+      this.gameService.addPlayerToResults(player);
     }
 
     this.router.navigate(['/board']);

@@ -67,7 +67,6 @@ export class BoardComponent implements OnInit, OnDestroy {
   isServerMode = false;
 
   currentProfile!: Profile;
-  private gameDataSubscription: Unsubscribe | undefined;
 
   get players(): PlayerModel[] {
     return this.gameState.players.map(p => new PlayerModel({ ...p })) as PlayerModel[];
@@ -102,14 +101,11 @@ export class BoardComponent implements OnInit, OnDestroy {
           players: state.players.map((p: PlayerModel) => ({ ...p } as PlayerModel)),
           results: [...state.results]
         };
-
         const displayedColumns = this.gameState.players.map(p => this.columnKeyBuilder(p));
         this.displayedColumns = [...displayedColumns, 'sumLabel'];
-
-
         this.calculateTotals();
       });
-    this.gameDataSubscription =this.gameService.observeGameState();
+    this.gameService.observeGameState();
   }
 
   columnKeyBuilder(player: PlayerModel): string {
@@ -118,7 +114,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   toggleTotalRow(): void {
     this.showTotalRow = !this.showTotalRow;
-    this.cdr.detectChanges(); // Ensure view updates immediately
+    this.cdr.detectChanges(); 
   }
 
   openAddGameDialog(): void {
@@ -204,7 +200,8 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   outGame(): void {
-    this.gameDataSubscription?.();
+    console.log('Exiting game...');
+    this.appService.isRunningGame$.next(false);
     const currentPlayer = this.players.find(p => p.profileId === this.currentProfile.profileId);
     if (currentPlayer) {
       currentPlayer.inactivePlayer();

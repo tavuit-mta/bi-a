@@ -1,10 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
-// @import "~@angular/material/prebuilt-themes/indigo-pink.css";
+/* src/styles.scss or src/styles.css */
+@font-face {
+  font-family: 'SF Pro'; /* Choose a descriptive name */
+  src: url('assets/fonts/SFPRODISPLAYREGULAR.OTF') format('opentype'); /* Adjust path and filename */
+  font-weight: 400; /* Adjust weight as needed for different font files */
+  font-style: normal;
+}
+
+/* Repeat for other SF Pro weights/styles if needed (e.g., Bold, Light) */
+@font-face {
+  font-family: 'SF Pro bold';
+  src: url('assets/fonts/SFPRODISPLAYBOLD.OTF') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
 
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, sans-serif;
+  font-family: "SF Pro", sans-serif;
 }
 
 .mat-card {
@@ -13,4 +26,5 @@ html, body {
 }
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; font-family: "SF Pro", sans-serif; }
+

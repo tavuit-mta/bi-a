@@ -40,7 +40,7 @@ export class SetupComponent implements OnInit, OnDestroy {
   profile!: Profile;
   gameState!: GameState;
 
-  get gameUnit(): Observable<number> {
+  get gameUnit(): Observable<number | null> {
     return this.gameService.unit$;
   }
 
@@ -70,9 +70,6 @@ export class SetupComponent implements OnInit, OnDestroy {
       .subscribe(([gameState, profile]) => {
         this.profile = profile;
         this.gameState = gameState;
-        console.log('Game state:', gameState);
-        console.log('Profile:', profile);
-        
         if (!profile || !profile.isComplete()) {
           this.router.navigate(['/profile']);
         } else if (gameState.players.some(p => p.profileId === profile.profileId)) {

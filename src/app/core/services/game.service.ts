@@ -16,7 +16,7 @@ export class GameService {
     results: []
   });
 
-  private _unit$ = new BehaviorSubject<number>(0);
+  private _unit$ = new BehaviorSubject<number | null>(10000);
 
   public unit$ = this._unit$.asObservable();
   public gameState$ = this._gameState$.asObservable();
@@ -39,8 +39,8 @@ export class GameService {
   pushGameData(result: GameState): void {
     console.log('Pushing game data:', result);
     const resultObject = {
-      results: result?.results,
-      players: (result?.players || []).map(player => new PlayerModel({ ...player })) as PlayerModel[]
+      results: result.results,
+      players: result.players.map(player => new PlayerModel({ ...player })) as PlayerModel[]
     }
     this._gameState$.next(resultObject);
   }
@@ -138,9 +138,10 @@ export class GameService {
     })
   }
 
-  observeGameState(): Unsubscribe {
+  observeGameState(): void {
     console.log('Observing game state from server...');
-    return this.appService.getGameData(this);
+    this.appService.isRunningGame$.next(true);
+    this.appService.getGameData(this);
   }
 
   addGameResult(result: GameResult): void {
@@ -258,7 +259,7 @@ export class GameService {
         currency: 'VND',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
-      }).format(amountToTransfer * this._unit$.value);
+      }).format(amountToTransfer * (this._unit$.value || 1));
 
       // Ghi nhận giao dịch
       transactions.push(`

@@ -6,7 +6,28 @@
 
   flex-direction: column;
 
-  gap: 24px;
+  gap: 12px;
+
+  background: url('/assets/images/Login.svg') no-repeat center center;
+  background-size: cover;
+
+  background-color: #F2F2F7;
+
+  button {
+    width: 200px;
+    font-weight: 400;
+    font-size: 14px;
+    font-family: "SF Pro", sans-serif;
+
+    &:nth-child(1) {
+      background-color: #FF383C;
+      color: white;
+    }
+    &:nth-child(2) {
+      background-color: #FF383C24;
+      color: #FF383C;
+    }
+  }
 }
 
 .add-player-form {

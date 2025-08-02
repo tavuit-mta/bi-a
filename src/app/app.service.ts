@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { deleteDoc, doc, docData, DocumentData, Firestore, getDoc, onSnapshot, setDoc, Unsubscribe, updateDoc, WithFieldValue } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { GameService } from './core/services/game.service';
 import { GameState } from './models/game-state.model';
 import moment from 'moment';
@@ -13,8 +13,14 @@ import { FIREBASE_PATH, GAME_STATE_KEY, PATH_KEY, SERVER_KEY } from './core/cons
 export class AppService {
   firestore = inject(Firestore);
   gamePath: string = [FIREBASE_PATH, moment().format('YYYY_MM_DD')].join('_');
+  private _isRunningGame: boolean = false;
 
+  isRunningGame$: Subject<boolean> = new Subject<boolean>();
+  
   constructor() {
+    this.isRunningGame$.asObservable().subscribe((isRunning)=>{
+      this._isRunningGame = isRunning;
+    })
   }
 
   get isServer(): boolean {
@@ -55,15 +61,15 @@ export class AppService {
     });
   }
 
-  getGameData(service: GameService): Unsubscribe {
+  getGameData(service: GameService) {
     const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
     const basePath = this.gamePath;
     const documentRef = doc(this.firestore, basePath, path);
-    return onSnapshot(documentRef, (docSnap) => {
-      if (docSnap.exists()) {
+    onSnapshot(documentRef, (docSnap) => {
+      if (docSnap.exists() && this._isRunningGame) {
         const data = docSnap.data() as GameState;
         console.log('Received real-time data:', docSnap.data());
         service.pushGameData(data);

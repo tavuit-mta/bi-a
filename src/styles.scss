@@ -39,6 +39,10 @@ body {
   font-family: "SF Pro", sans-serif;
 }
 
+body {
+  touch-action: manipulation;
+}
+
 
 .blurred-backdrop {
   // backdrop-filter: blur(5px);

@@ -12,15 +12,18 @@
 
   height: calc(100vh - 32px);
 
+  position: relative;
   .button-container {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 
-    margin-top: 25rem;
-
     gap: 12px;
+
+    position: absolute;
+
+    bottom: 10rem;
 
     button {
       width: 200px;

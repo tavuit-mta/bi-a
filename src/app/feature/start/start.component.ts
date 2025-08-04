@@ -140,10 +140,9 @@ export class StartComponent implements OnDestroy {
   }
 
   loadGameData(gameData: GameState | null = null): void {
-    const IS_CLIENT = false;
     if (gameData && gameData.players && gameData.players.length > 0) {
       this.gameService.pushGameData(gameData);
-      this.appService.storeGamePath(this.joinGameCode, IS_CLIENT);
+      this.appService.storeGamePath(this.joinGameCode, false);
       this.openSetup();
       return;
     }
@@ -151,8 +150,12 @@ export class StartComponent implements OnDestroy {
       console.log('Game data loaded:', gameState);
       if (gameState && gameState?.players?.length > 0) {
           this.gameService.pushGameData(gameState);
-          this.appService.storeGamePath(this.joinGameCode, IS_CLIENT);
-          this.openSetup();
+          this.appService.storeGamePath(this.joinGameCode, true);
+          this.appService.startLoading();
+          setTimeout(()=>{
+            this.router.navigate(['/board']);
+            this.appService.stopLoading();
+          }, 2000);
         } else {
           this.appService.deleteGameData(this.gameService);
         }

@@ -26,6 +26,8 @@ import { Profile } from '../../models/profile.model';
 import { MatChipsModule } from '@angular/material/chips';
 import { ProfileService } from '../../core/services/profile.service';
 import { TransactionComponent } from '../transaction/transaction.component';
+import { LongPressDirective } from '../../shared/long-press.directive';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   standalone: true,
@@ -43,7 +45,9 @@ import { TransactionComponent } from '../transaction/transaction.component';
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatChipsModule
+    MatChipsModule,
+    LongPressDirective,
+    MatMenuModule
   ],
 })
 export class BoardComponent implements OnInit, OnDestroy {
@@ -56,6 +60,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   @ViewChild('tableWrapper', { static: false }) tableWrapper!: ElementRef<HTMLDivElement>;
   @ViewChild('addPlayerDialog', { static: false }) addPlayerDialog!: TemplateRef<HTMLDivElement>;
+  @ViewChild(MatMenuTrigger) matMenuTrigger!: MatMenuTrigger;
 
   showTotalRow = false;
 
@@ -65,7 +70,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   currentProfile!: Profile;
 
   addPlayerForm: FormControl = new FormControl('', [Validators.required]);
-
+  menuPosition = { x: '0px', y: '0px' };
 
   get players(): PlayerModel[] {
     return this.gameState.players.map(p => new PlayerModel({ ...p })) as PlayerModel[];
@@ -101,7 +106,7 @@ export class BoardComponent implements OnInit, OnDestroy {
           results: [...state.results]
         };
         const displayedColumns = this.gameState.players.map(p => this.columnKeyBuilder(p));
-        this.displayedColumns = [...displayedColumns, 'sumLabel'];
+        this.displayedColumns = [...displayedColumns];
         this.calculateTotals();
       });
     this.gameService.observeGameState();
@@ -113,7 +118,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   toggleTotalRow(): void {
     this.showTotalRow = !this.showTotalRow;
-    this.cdr.detectChanges(); 
+    this.cdr.detectChanges();
   }
 
   openAddGameDialog(): void {
@@ -166,7 +171,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.dialog.closeAll();
   }
 
-  editGame(result: GameResult, rowIndex: number): void {
+  editGame(result: GameResult, rowIndex: number): void {    
     const playersForGame = result.players && result.players.length > 0
       ? result.players
       : this.gameState.players.slice(0, result.nPlayers);
@@ -193,12 +198,17 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   endGame(): void {
     if (confirm('Bạn chắc chắn muốn kết thúc và xóa toàn bộ dữ liệu?')) {
-      this.gameService.resetGame();
-      this.router.navigate(['/']);
+      this.appService.startLoading();
+      this.gameService.resetGame().then(() => {
+        this.router.navigate(['/']);
+      }).finally(() => {
+        this.appService.stopLoading();
+      })
     }
   }
 
   outGame(): void {
+    this.appService.startLoading();
     console.log('Exiting game...');
     this.appService.isRunningGame$.next(false);
     const currentPlayer = this.players.find(p => p.profileId === this.currentProfile.profileId);
@@ -210,9 +220,11 @@ export class BoardComponent implements OnInit, OnDestroy {
         results: []
       };
       this.gameService.pushGameData(newState);
-      setTimeout(()=>{
+      setTimeout(() => {
         this.appService.removeGameData(this.gameService).then(() => {
           this.router.navigate(['/']);
+        }).finally(() => {
+          this.appService.stopLoading();
         });
       }, 1000);
     }
@@ -309,7 +321,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     }
     const numPlayers = this.gameState.players.length;
     const totals = new Array(numPlayers).fill(0);
-    
+
     this.playerScores = this.gameState.players.map(p => p.name).reduce((acc: Record<string, number>, name) => {
       acc[name] = 0;
       return acc;
@@ -345,6 +357,25 @@ export class BoardComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  onLongPress(event: MouseEvent | TouchEvent, row: GameResult, rowIndex: number) {
+    event.preventDefault(); // Prevent context menu, etc.
+
+    // Get the coordinates from the event
+    const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
+    const clientY = event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
+
+    // Position the menu at the press location
+    this.menuPosition.x = clientX + 'px';
+    this.menuPosition.y = clientY + 'px';
+
+    // Pass the row data to the menu
+    this.matMenuTrigger.menuData = { item: row, rowIndex };
+
+    // Set the trigger's position and open the menu
+    this.matMenuTrigger.openMenu();
+  }
+
 
   public showQrCode(): void {
     this.dialog.open(QrGameComponent);

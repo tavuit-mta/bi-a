@@ -33,7 +33,7 @@
                 <div class="custom-form-row">
                   <label for="commonPoints" class="custom-label">Số lá còn lại</label>
                   <input id="commonPoints" type="number" class="custom-input" [formControl]="remainingForm(idx)"
-                    numberPattern pattern="[0-9]*" />
+                    numberPattern pattern="[0-9]*"/>
                 </div>
                 <div class="extended-per-player" [formGroup]="extendedForm(idx)">
                   <!-- Common Points Row (always visible) -->
@@ -45,15 +45,14 @@
                     <div class="custom-form-row">
                       <label for="commonPoints" class="custom-label">Điểm chung</label>
                       <input id="commonPoints" type="number" class="custom-input" formControlName="commonPoints"
-                        numberPattern pattern="[0-9]*" />
+                        numberPattern pattern="[0-9]*"/>
                     </div>
                   </div>
                   <!-- Penalty Points Row (always visible) -->
                   <div class="extended-row">
-                    <div class="penalty-payers-list">
-                      <div class="penalty-row"
-                        *ngFor="let payerCtrl of getPenaltyPayersFormArray(idx).controls; let j = index"
-                        [ngStyle]="{'display': idx !== j ? 'block' : 'none'}">
+                    <div class="penalty-payers-list"
+                      *ngFor="let payerCtrl of getPenaltyPayersFormArray(idx).controls; let j = index">
+                      <div class="penalty-row" *ngIf="idx !== j">
                         <!-- <mat-form-field appearance="outline" class="penalty-amount-input" subscriptSizing="dynamic"
                           *ngIf="idx !== j">
                           <mat-label>Điểm {{ players[j].name }} đền</mat-label>

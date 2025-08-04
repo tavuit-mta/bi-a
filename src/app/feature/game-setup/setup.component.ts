@@ -75,7 +75,7 @@ export class SetupComponent implements OnInit, OnDestroy {
       .subscribe(([gameState, profile]) => {        
         this.profile = profile;
         this.gameState = gameState;
-        if (gameState.players.some(p => p.profileId === profile.profileId)) {
+        if (gameState.players.some(p => p.profileId === profile.profileId) && !this.isServerMode) {
           const currentPlayer = gameState.players.find(p => p.profileId === profile.profileId);
           if (currentPlayer) {
             currentPlayer.activePlayer();

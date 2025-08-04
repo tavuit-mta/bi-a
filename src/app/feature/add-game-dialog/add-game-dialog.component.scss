@@ -14,14 +14,11 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 12px;
-  // margin-bottom: 24px;
-  // padding: 8px;
+  // gap: 12px;
 
-  // border: 1px solid;
-  // border-radius: 8px;
-
-  // background-color: #E5E5E5;
+  background: #fafafa;
+  border-radius: 34px;
+  padding: 16px 24px;
 }
 
 .tiles-input,
@@ -36,14 +33,14 @@
   max-width: 500px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  // gap: 8px;
 }
 
 .extended-row {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  // gap: 8px;
 }
 
 .extended-input,
@@ -60,14 +57,10 @@
   width: 100%;
 }
 
-// .player-panel {
-// margin: 16px 0;
-// }
-
 @media (max-width: 600px) {
   .player-row {
     flex-direction: column;
-    gap: 8px;
+    // gap: 8px;
   }
 
   .tiles-input,
@@ -85,14 +78,14 @@
   background-color: rgb(255 222 222 / 30%) !important;
 }
 
-.winner-select {
+::ng-deep .mat-expansion-panel {
+  background-color: #F5F5F5 !important;
+}
 
-  /* Use ::ng-deep to target the inner container of the mat-form-field */
-  /* This is the element that controls the background and shape */
+.winner-select {
   ::ng-deep .mdc-text-field--filled {
-    background-color: white;
-    border-radius: 50px;
-    /* This creates the pill shape */
+    background-color: #FAFAFA !important;
+    border-radius: 24px;
   }
 
   ::ng-deep .mat-mdc-select-placeholder {
@@ -102,17 +95,14 @@
     color: rgba(60, 60, 67, 0.3) !important;
   }
 
-  /* Remove the underline/ripple effect */
   ::ng-deep .mat-mdc-form-field-ripple {
     display: none;
   }
 
-  /* Hide the line that appears at the bottom */
   ::ng-deep .mdc-line-ripple {
     display: none;
   }
 
-  /* Adjust the padding for the text inside */
   ::ng-deep .mat-mdc-form-field-infix {
     padding-left: 20px;
     padding-right: 12px;
@@ -135,55 +125,46 @@
 
 .winner-info {
   margin-top: 34px;
-  border-radius: 16px !important;
+  border-radius: 34px !important;
   overflow: hidden;
 }
 
-// Style for each row in the list
 .custom-form-row {
   display: flex;
-  justify-content: space-between; // This pushes the label and input apart
+  justify-content: space-between;
   align-items: center;
-  padding: 16px 0; // Vertical padding
-  border-bottom: 1px solid #000000; // The separator line
+  padding: 16px 0;
+  border-bottom: 1px solid #000000;
 
-  width: 100%; // Full width of the container
+  width: 100%;
 }
 
-// Remove the border from the very last item
-.penalty-payers-list .penalty-row:last-child  {
-  .custom-form-row {
-    border-bottom: none !important; // No border for the last item
-  }
+.penalty-payers-list:last-child .custom-form-row {
+  border-bottom: none !important;
 }
 
-// Style for the gray label text
 .custom-label {
   color: #8a8a8e;
   font-size: 16px;
 }
 
-// Style for the input to make it blend in
 .custom-input {
-  // --- This makes the input "invisible" ---
   border: none;
   background-color: transparent;
   outline: none;
 
-  // --- Text styling ---
-  // text-align: right; // Align numbers to the right
   color: #000000;
   font-size: 16px;
   font-weight: 500;
-  width: 30%;
+  width: 20%;
 }
 
-// Optional: Hide the number input spinner arrows
 .custom-input::-webkit-outer-spin-button,
 .custom-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 .custom-input[type=number] {
   -moz-appearance: textfield;
 }
@@ -207,4 +188,8 @@
     background: rgba(118, 118, 128, 0.12);
     color: rgba(0, 0, 0, 1);
   }
+}
+
+::ng-deep div.mat-mdc-select-panel {
+  border-radius: 24px !important;
 }

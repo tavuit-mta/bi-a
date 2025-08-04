@@ -49,7 +49,7 @@ export class GameService {
     const current = this._gameState$.value;
     const players = current.players.map(p => p.id === player.id ? player : p);
     const newState: GameState = {
-      ...current, 
+      ...current,
       players
     };
     console.log('Updating player:', player);
@@ -181,13 +181,13 @@ export class GameService {
     this.saveToStorage();
   }
 
-  resetGame(): void {
-    this.appService.removeGameData(this).then(()=>{
-    const newState: GameState = {
-      players: [],
-      results: []
-    };
-    this.pushGameData(newState);
+  async resetGame(): Promise<void> {
+    return this.appService.removeGameData(this).then(() => {
+      const newState: GameState = {
+        players: [],
+        results: []
+      };
+      this.pushGameData(newState);
     });
   }
 
@@ -234,7 +234,7 @@ export class GameService {
  * @param {Object} scores - Một object với key là tên người chơi và value là điểm số.
  * @returns {Array<string>} - Một mảng chứa các chuỗi mô tả giao dịch.
  */
-  calculateTransactions(scores: {[key: string]: number}): string[] {
+  calculateTransactions(scores: { [key: string]: number }): string[] {
     // 1. Tách người chơi thành hai nhóm: nợ (điểm âm) và nhận (điểm dương)
     const debtors = Object.entries(scores)
       .filter(([name, score]) => score < 0)

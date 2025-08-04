@@ -14,6 +14,8 @@ import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
+import { SetupComponent } from '../game-setup/setup.component';
 
 @Component({
   standalone: true,
@@ -45,16 +47,30 @@ export class StartComponent implements OnDestroy {
     private router: Router,
     private appService: AppService,
     private gameService: GameService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private dialog: MatDialog,
   ) {
     if (this.appService.hasStartedGame()) {
       console.log('Game already started, redirecting to setup...');
       this.joinGameCode = this.appService.getGamePath();
+      if (!this.joinGameCode) {
+        console.error('No game path found in local storage.');
+        return;
+      }
       this.loadGameData();
     }
   }
 
+  openSetup(): void {
+    this.dialog.open(SetupComponent, {
+      width: '90%',
+      backdropClass: 'blurred-backdrop',
+      panelClass: 'custom-dialog-panel'
+    })
+  }
+
   startGame(): void {
+    this.appService.startLoading();
     const options = {
       node: Uint8Array.of(0x01, 0x23, 0x45, 0x67, 0x89, 0xab),
       clockseq: 0x1234,
@@ -64,15 +80,17 @@ export class StartComponent implements OnDestroy {
     const GAME_ID = uuidv6(options).toLocaleUpperCase();
     this.appService.initializeGame(GAME_ID).then(() => {
       this.appService.storeGamePath(GAME_ID, true);
-      this.router.navigate(['/setup']);
-    })
+      this.openSetup();
+    }).finally(() => {
+      this.appService.stopLoading();
+    });
   }
 
   stopScanQR(): void {
     BarcodeScanner.stopScan();
     BarcodeScanner.showBackground();
     this.startScanning = false;
-    this.scannerActive = false; // Deactivate our CSS styles
+    this.scannerActive = false; 
   }
 
   async scanQR(): Promise<void> {
@@ -122,23 +140,23 @@ export class StartComponent implements OnDestroy {
   }
 
   loadGameData(gameData: GameState | null = null): void {
+    const IS_CLIENT = false;
     if (gameData && gameData.players && gameData.players.length > 0) {
       this.gameService.pushGameData(gameData);
-      this.appService.storeGamePath(this.joinGameCode, false);
-      this.router.navigate(['/setup']);
+      this.appService.storeGamePath(this.joinGameCode, IS_CLIENT);
+      this.openSetup();
       return;
     }
-    this.appService.getGameDataOnce()
-      .pipe(takeUntil(this.onDestroy$))
-      .subscribe((gameState: GameState) => {
-        if (gameState?.players?.length > 0) {
+    this.appService.getGameDataOnce().then((gameState: GameState | undefined) => {
+      console.log('Game data loaded:', gameState);
+      if (gameState && gameState?.players?.length > 0) {
           this.gameService.pushGameData(gameState);
-          this.appService.storeGamePath(this.joinGameCode, false);
-          this.router.navigate(['/setup']);
+          this.appService.storeGamePath(this.joinGameCode, IS_CLIENT);
+          this.openSetup();
         } else {
           this.appService.deleteGameData(this.gameService);
         }
-      });
+    })
   }
 
   cancelJoinGame(): void {

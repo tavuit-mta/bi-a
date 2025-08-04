@@ -8,6 +8,7 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { environment } from '../environments/environment';
 import { DEVICE_ID_KEY } from './core/constants/core.constant';
 import { v4 as uuidv4 } from 'uuid';
+import { provideHttpClient } from '@angular/common/http';
 
 function initializeDevice(): void {
   // Store deviceID in localStorage if not already present
@@ -22,6 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes), 
     provideAnimationsAsync(), 
+    provideHttpClient(),
     provideFirebaseApp(() => initializeApp(environment.firebase)), 
     provideFirestore(() => getFirestore()),
     {

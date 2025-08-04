@@ -1,8 +1,8 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
-import { Player, PlayerModel } from '../../models/player.model';
+import { PlayerModel } from '../../models/player.model';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,10 +11,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ProfileService } from '../../core/services/profile.service';
 import { Profile } from '../../models/profile.model';
-import { combineLatest, distinct, Observable, Subject, takeUntil } from 'rxjs';
+import { combineLatest, distinct, distinctUntilKeyChanged, Observable, Subject, take, takeUntil } from 'rxjs';
 import { AppService } from '../../app.service';
 import { GameState } from '../../models/game-state.model';
 import { NgxCurrencyDirective } from "ngx-currency";
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogRef } from '@angular/material/dialog';
+
 
 @Component({
   standalone: true,
@@ -30,7 +33,8 @@ import { NgxCurrencyDirective } from "ngx-currency";
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    NgxCurrencyDirective
+    NgxCurrencyDirective,
+    MatDividerModule
   ]
 })
 export class SetupComponent implements OnInit, OnDestroy {
@@ -53,10 +57,11 @@ export class SetupComponent implements OnInit, OnDestroy {
     private appService: AppService,
     private gameService: GameService,
     private profileService: ProfileService,
-    private router: Router
+    private router: Router,
+    private dialogRef: MatDialogRef<SetupComponent>
   ) {
     this.playerForm = this.fb.group({
-      player: new FormControl({value: null, disabled: true}, [Validators.required]),
+      player: new FormControl(null, [Validators.required]),
     });
     this.isServerMode = this.appService.isServer;
     combineLatest([
@@ -67,22 +72,34 @@ export class SetupComponent implements OnInit, OnDestroy {
         takeUntil(this.onDestroy$),
         distinct(([gameState, profile]) => profile.profileId)
       )
-      .subscribe(([gameState, profile]) => {
+      .subscribe(([gameState, profile]) => {        
         this.profile = profile;
         this.gameState = gameState;
-        if (!profile || !profile.isComplete()) {
-          this.router.navigate(['/profile']);
-        } else if (gameState.players.some(p => p.profileId === profile.profileId)) {
+        if (gameState.players.some(p => p.profileId === profile.profileId)) {
           const currentPlayer = gameState.players.find(p => p.profileId === profile.profileId);
           if (currentPlayer) {
             currentPlayer.activePlayer();
             this.gameService.putPlayer(currentPlayer);
-            this.router.navigate(['/board']);
+            this.appService.startLoading();
+            setTimeout(()=>{
+              this.router.navigate(['/board']);
+              this.dialogRef.close();
+              this.appService.stopLoading();
+            }, 2000);
           }
         } else if (profile && profile.username) {
           this.addPlayer(profile.username);
         }
       });
+
+    this.playerForm.valueChanges.pipe(
+      takeUntil(this.onDestroy$),
+      distinctUntilKeyChanged('player')
+    ).subscribe(value => {
+      const { player } = value;
+      const profileData: Profile = new Profile(player);
+      this.profileService.updateProfile(profileData);
+    });
   }
 
   ngOnInit(): void {
@@ -119,19 +136,12 @@ export class SetupComponent implements OnInit, OnDestroy {
       this.gameService.addPlayerToResults(player);
     }
 
-    this.router.navigate(['/board']);
-  }
-
-  editProfile(): void {
-    this.router.navigate(['/profile'], { queryParams: { fromSetup: true } });
-  }
-
-  view(): void {
-    this.router.navigate(['/board']);
-  }
-
-  cancel(): void {
-    this.router.navigate(['/']);
+    this.appService.startLoading();
+    setTimeout(()=>{
+      this.router.navigate(['/board']);
+      this.dialogRef.close();
+      this.appService.stopLoading();
+    }, 2000);
   }
 
   ngOnDestroy(): void {

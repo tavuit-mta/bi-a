@@ -1,31 +1,42 @@
+.background {
+  background: url('/assets/images/background.svg') no-repeat center center;
+  background-size: cover;
+
+  background-color: #F2F2F7;
+}
+
 .start-container {
-  height: calc(100vh - 32px);
   display: flex;
   justify-content: center;
   align-items: center;
 
-  flex-direction: column;
+  height: calc(100vh - 32px);
 
-  gap: 12px;
+  .button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 
-  background: url('/assets/images/Login.svg') no-repeat center center;
-  background-size: cover;
+    margin-top: 25rem;
 
-  background-color: #F2F2F7;
+    gap: 12px;
 
-  button {
-    width: 200px;
-    font-weight: 400;
-    font-size: 14px;
-    font-family: "SF Pro", sans-serif;
+    button {
+      width: 200px;
+      font-weight: 400;
+      font-size: 14px;
+      font-family: "SF Pro", sans-serif;
 
-    &:nth-child(1) {
-      background-color: #FF383C;
-      color: white;
-    }
-    &:nth-child(2) {
-      background-color: #FF383C24;
-      color: #FF383C;
+      &:nth-child(1) {
+        background-color: #FF383C;
+        color: white;
+      }
+
+      &:nth-child(2) {
+        background-color: #FF383C24;
+        color: #FF383C;
+      }
     }
   }
 }

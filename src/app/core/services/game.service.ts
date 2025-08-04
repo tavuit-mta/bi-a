@@ -182,13 +182,13 @@ export class GameService {
   }
 
   resetGame(): void {
+    this.appService.removeGameData(this).then(()=>{
     const newState: GameState = {
       players: [],
       results: []
     };
     this.pushGameData(newState);
-    localStorage.removeItem(GAME_STATE_KEY);
-    this.appService.removeGameData(this);
+    });
   }
 
   saveToStorage(): void {

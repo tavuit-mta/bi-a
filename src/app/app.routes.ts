@@ -6,7 +6,7 @@ import { ProfileComponent } from './feature/profile/profile.component';
 
 export const routes: Routes = [
     { path: '', component: StartComponent },
-    { path: 'setup', component: SetupComponent },
+    // { path: 'setup', component: SetupComponent },
     { path: 'board', component: BoardComponent },
     { path: 'profile', component: ProfileComponent },
     { path: '**', redirectTo: '' }

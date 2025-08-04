@@ -4,16 +4,16 @@
       <span>Kết quả ván đấu</span>
       <div>
         <button mat-icon-button (click)="showQrCode()">
-        <mat-icon>qr_code</mat-icon>
-      </button>
-      <button mat-icon-button (click)="calculateTransactions()">
-        <mat-icon>paid</mat-icon>
-      </button>
+          <mat-icon svgIcon="qr_code"></mat-icon>
+        </button>
+        <button mat-icon-button (click)="calculateTransactions()">
+          <mat-icon>paid</mat-icon>
+        </button>
       </div>
     </mat-card-title>
 
     <mat-card-content class="board-content">
-      <div class="table-scroll-wrapper" #tableWrapper [ngClass]="{'max-height': !isServerMode}">
+      <div class="table-scroll-wrapper table-container" #tableWrapper [ngClass]="{'max-height': !isServerMode}">
         <table mat-table [dataSource]="gameState.results" class="mat-elevation-z8 fixed-width-table">
 
           <ng-container matColumnDef="sumLabel">
@@ -35,7 +35,7 @@
               </button>
             </td>
           </ng-container>
-          
+
           <!-- Player columns -->
           <ng-container *ngFor="let player of players; let i = index" [matColumnDef]="columnKeyBuilder(player)">
             <th mat-header-cell *matHeaderCellDef class="fixed-col">
@@ -60,17 +60,17 @@
     </mat-card-content>
 
     <mat-card-actions class="action-row" *ngIf="isServerMode">
-      <button mat-raised-button color="primary" class="action-btn" (click)="openAddGameDialog()">
-        Thêm Ván Đấu
+      <button mat-fab class="add-new-game" aria-label="Thêm Ván Đấu" (click)="openAddGameDialog()">
+        <mat-icon>add</mat-icon>
       </button>
       <button mat-raised-button color="warn" class="action-btn" (click)="endGame()">
-        Kết Thúc & Xóa Dữ Liệu
-      </button>
-      <button mat-raised-button color="primary" class="action-btn" (click)="exportTableAsPngIonic()">
-        Xuất ảnh
+        Thoát ván đấu
       </button>
       <button mat-raised-button color="primary" class="action-btn" (click)="showAddPlayer()">
         Thêm người chơi
+      </button>
+      <button mat-raised-button color="primary" class="action-btn" (click)="exportTableAsPngIonic()">
+        Xuất ảnh
       </button>
     </mat-card-actions>
 
@@ -82,17 +82,25 @@
         Xuất ảnh
       </button>
     </mat-card-actions>
-
-    <form *ngIf="showAddPlayerInput" class="add-player-form" (ngSubmit)="confirmAddPlayer()">
-      <mat-form-field appearance="outline" class="add-player-input" [subscriptSizing]="'dynamic'">
-        <mat-label>Tên người chơi mới</mat-label>
-        <input matInput [(ngModel)]="addPlayerName" name="addPlayerName" required
-          [ngModelOptions]="{standalone: true}" />
-      </mat-form-field>
-      <div class="add-player-actions">
-        <button mat-raised-button color="primary" type="submit">Thêm</button>
-        <button mat-button type="button" (click)="cancelAddPlayer()">Hủy</button>
-      </div>
-    </form>
   </mat-card>
 </div>
+
+<ng-template #addPlayerDialog>
+  <div class="add-player-title-container">
+    <span class="add-player-title">Thêm người chơi</span>
+    <span class="add-player-subtitle">Hãy đặt tên hiển thị trong ván game</span>
+  </div>
+  <mat-dialog-content>
+    <form class="add-player-form">
+      <mat-form-field appearance="fill" class="add-player-input" [subscriptSizing]="'dynamic'">
+        <input class="player-input" matInput [formControl]="addPlayerForm" name="addPlayerName" placeholder="Tên người chơi"/>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions>
+    <div class="add-player-actions">
+      <button mat-raised-button color="warn" mat-dialog-close>Hủy</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="addPlayerForm.invalid" (click)="confirmAddPlayer()">Thêm</button>
+    </div>
+  </mat-dialog-actions>
+</ng-template>

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { deleteDoc, doc, docData, DocumentData, Firestore, getDoc, onSnapshot, setDoc, Unsubscribe, updateDoc, WithFieldValue } from '@angular/fire/firestore';
-import { Observable, Subject } from 'rxjs';
+import { deleteDoc, doc, docData, DocumentData, Firestore, getDoc, onSnapshot, setDoc, updateDoc, WithFieldValue } from '@angular/fire/firestore';
+import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { GameService } from './core/services/game.service';
 import { GameState } from './models/game-state.model';
 import moment from 'moment';
@@ -16,11 +16,20 @@ export class AppService {
   private _isRunningGame: boolean = false;
 
   isRunningGame$: Subject<boolean> = new Subject<boolean>();
+  public readonly isLoading$ = new BehaviorSubject<boolean>(false);
   
   constructor() {
     this.isRunningGame$.asObservable().subscribe((isRunning)=>{
       this._isRunningGame = isRunning;
     })
+  }
+
+  startLoading(): void {
+    this.isLoading$.next(true);
+  }
+
+  stopLoading(): void {
+    this.isLoading$.next(false);
   }
 
   get isServer(): boolean {
@@ -78,14 +87,14 @@ export class AppService {
     });
   }
 
-  getGameDataOnce(): Observable<GameState> {
+  getGameDataOnce(): Promise<GameState | undefined> {
     const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
     const basePath = this.gamePath;
     const documentRef = doc(this.firestore, basePath, path);
-    return docData(documentRef) as Observable<GameState>;
+    return firstValueFrom(docData(documentRef)) as Promise<GameState | undefined>;
   }
 
   pushGameData(data: WithFieldValue<DocumentData>): Promise<void> {

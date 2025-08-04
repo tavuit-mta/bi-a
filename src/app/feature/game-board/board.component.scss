@@ -2,6 +2,24 @@
   width: 100%;
   max-width: 100vw;
   box-sizing: border-box;
+
+  background: url('/assets/images/main-background.svg') no-repeat center center;
+  background-size: cover;
+
+  background-color: rgba(242, 242, 247, 1);
+  height: calc(100vh - 32px);
+
+  .mat-mdc-card {
+    background: transparent !important;
+    border: unset !important;
+    box-shadow: unset !important;
+  }
+}
+
+.add-new-game {
+  border-radius: 50%;
+  background-color: #FF383C;
+  color: white;
 }
 
 .table-scroll-wrapper {
@@ -9,6 +27,10 @@
   overflow-x: auto;
   position: relative;
   height: calc(100vh - 400px - 32px);
+}
+
+::ng-deep .table-scroll-wrapper::-webkit-scrollbar {
+  display: none !important;
 }
 
 .fixed-width-table {
@@ -38,7 +60,9 @@
     right: 2px;
     z-index: 2;
   }
-  .action-header, .action-cell {
+
+  .action-header,
+  .action-cell {
     min-width: 80px;
     max-width: 80px;
     width: 80px;
@@ -46,26 +70,42 @@
   }
 }
 
-.action-row {
-  display: flex;
+::ng-deep .action-row {
+  flex-direction: column !important;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
   width: 100%;
   gap: 16px;
-  
+
   .action-btn {
     flex: 1 1 0;
-    max-width: 48%;
-    min-width: 120px;
+    width: 200px;
 
-    min-height: 48px;
-    border-radius: 14px;
+    min-height: 34px;
+    border-radius: 20px;
+
+    font-family: SF Pro;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 20px;
+    letter-spacing: -0.23px;
+  }
+
+  button[color="warn"] {
+    background: rgba(255, 56, 60, 0.14);
+    color: rgba(255, 56, 60, 1);
+  }
+
+  button[color="primary"] {
+    background: rgba(118, 118, 128, 0.12);
+    color: rgba(0, 0, 0, 1);
   }
 
   .left {
     justify-self: flex-start;
   }
+
   .right {
     justify-self: flex-end;
   }
@@ -78,20 +118,24 @@
   }
 }
 
-.add-player-form {
+.add-player-actions {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 16px 16px 16px;
+  width: 100%;
+  gap: 10px;
 
-  .add-player-input {
+  button {
     flex: 1 1 auto;
+    height: 50px;
   }
 
-  .add-player-actions {
-    display: flex;
+  button[color="warn"] {
+    background: rgba(255, 56, 60, 0.14);
+    color: rgba(255, 56, 60, 1);
+  }
+
+  button[color="primary"] {
+    background: rgba(118, 118, 128, 0.12);
+    color: rgba(0, 0, 0, 1);
   }
 }
 
@@ -106,8 +150,190 @@
   padding: 16px;
 }
 
+::ng-deep .mat-mdc-dialog-title {
+  margin-bottom: 10px !important;
+}
+
+::ng-deep .add-player-title-container {
+  display: flex !important;
+  flex-direction: column;
+
+  gap: 10px;
+  padding: 24px;
+
+  .add-player-title {
+    font-family: SF Pro;
+    font-weight: bold !important;
+    font-size: 17px;
+    line-height: 22px;
+
+    color: rgba(0, 0, 0, 1);
+  }
+
+  .add-player-subtitle {
+    font-family: SF Pro;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 22px;
+
+    color: rgba(0, 0, 0, 1);
+  }
+}
+
+::ng-deep .add-player-input {
+  flex: 1;
+  width: 100%;
+  height: 52px;
+
+  .mdc-text-field {
+    border-radius: 28px;
+    background-color: #FFFFFF !important;
+  }
+
+  .mdc-line-ripple {
+    display: none !important;
+  }
+}
+
+.player-input::placeholder,
+mat-label {
+  font-family: "SF Pro";
+  font-weight: 510 !important;
+  font-size: 17px;
+  color: rgba(60, 60, 67, 0.3) !important;
+}
+
+/* This is your custom panel class */
+::ng-deep .custom-dialog-panel {
+  .mat-mdc-dialog-surface {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(10px);
+  }
+}
+
+
+.table-container {
+  border-radius: 16px;
+}
+
+.mat-mdc-table {
+  width: 100%;
+  background-color: #FFFFFF !important;
+
+  box-shadow: unset !important;
+
+  padding: 8px;
+  border-radius: 16px;
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell,
+.mat-mdc-footer-cell {
+  position: relative;
+  border: none;
+  text-align: center;
+  justify-content: center;
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  justify-content: center;
+  text-align: center;
+
+  background-color: rgba(252, 252, 252, 1) !important;
+}
+
+.mat-mdc-header-cell:last-of-type,
+.mat-mdc-cell:last-of-type {
+  border-right: none;
+}
+
+::ng-deep tr.total-row {
+  border-bottom-right-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+
+td.total-row {
+  color: #007bff;
+  font-weight: bold;
+
+  background-color: rgba(252, 252, 252, 1) !important;
+}
+
+.mat-mdc-footer-cell:first-of-type {
+  border-bottom-left-radius: 16px !important;
+}
+
+.mat-mdc-footer-cell:last-of-type {
+  border-bottom-right-radius: 16px !important;
+}
+
+.mat-mdc-footer-row {
+  background-color: rgba(252, 252, 252, 1);
+  font-weight: bold;
+}
+
+.mat-mdc-footer-cell {
+  border-bottom: none;
+}
+
+.mat-mdc-header-cell::after,
+.mat-mdc-cell::after,
+.mat-mdc-footer-cell::after {
+  content: '';
+  position: absolute;
+  background-color: rgba(219, 219, 219, 1);
+
+  width: 1px;
+  height: 100%;
+  top: 0%;
+  right: 0;
+}
+
+.mat-mdc-header-cell::after {
+  top: 10%;
+}
+
+.mat-mdc-footer-cell::after {
+  top: -10%;
+}
+
+.mat-mdc-header-cell:last-of-type::after,
+.mat-mdc-cell:last-of-type::after,
+.mat-mdc-footer-cell:last-of-type::after {
+  display: none;
+}
+
+.mat-mdc-header-cell::before,
+.mat-mdc-cell::before {
+  content: '';
+  position: absolute;
+  background-color: rgba(219, 219, 219, 1);
+  height: 1px;
+  bottom: 0;
+}
+
+.mat-mdc-header-cell:first-of-type::before,
+.mat-mdc-cell:first-of-type::before {
+  width: 90%;
+  left: 10%;
+}
+
+.mat-mdc-header-cell:not(:first-of-type)::before,
+.mat-mdc-cell:not(:first-of-type)::before {
+  width: 100%;
+  left: 0;
+}
+
+.mat-mdc-header-cell:last-of-type::before,
+.mat-mdc-cell:last-of-type::before {
+  width: 90%;
+  left: 0;
+}
+
 @media (max-width: 600px) {
   .fixed-width-table {
+
     th.fixed-col,
     td.fixed-col {
       min-width: 110px;
@@ -116,19 +342,12 @@
       font-size: 14px;
       padding: 4px;
     }
-    
-    .action-header, .action-cell {
+
+    .action-header,
+    .action-cell {
       min-width: 150px !important;
       max-width: 150px !important;
       width: 150px !important;
-    }
-  }
-  .action-row {
-    flex-direction: column;
-    gap: 8px;
-    .action-btn {
-      max-width: 100%;
-      width: 100%;
     }
   }
 }

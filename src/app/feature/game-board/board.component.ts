@@ -1,20 +1,20 @@
-import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Renderer2, ChangeDetectorRef, TemplateRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
-import { Player, PlayerModel } from '../../models/player.model';
+import { PlayerModel } from '../../models/player.model';
 import { GameResult } from '../../models/game-result.model';
 import { AddGameDialogComponent } from '../add-game-dialog/add-game-dialog.component';
 import { MatCardModule } from '@angular/material/card';
-import { MatTable, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import html2canvas from 'html2canvas';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormControl, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ModalMode } from '../../models/game-state.model';
@@ -25,7 +25,6 @@ import { QrGameComponent } from '../qr-game/qr-game.component';
 import { Profile } from '../../models/profile.model';
 import { MatChipsModule } from '@angular/material/chips';
 import { ProfileService } from '../../core/services/profile.service';
-import { Unsubscribe } from '@angular/fire/firestore';
 import { TransactionComponent } from '../transaction/transaction.component';
 
 @Component({
@@ -54,19 +53,19 @@ export class BoardComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [];
   totalScores: number[] = [];
   playerScores: Record<string, number> = {};
-  private sub!: Subscription;
 
   @ViewChild('tableWrapper', { static: false }) tableWrapper!: ElementRef<HTMLDivElement>;
+  @ViewChild('addPlayerDialog', { static: false }) addPlayerDialog!: TemplateRef<HTMLDivElement>;
 
-  showAddPlayerInput = false;
-  addPlayerName = '';
-  addPlayerError = '';
   showTotalRow = false;
 
   album = 'BilliardScore';
   isServerMode = false;
 
   currentProfile!: Profile;
+
+  addPlayerForm: FormControl = new FormControl('', [Validators.required]);
+
 
   get players(): PlayerModel[] {
     return this.gameState.players.map(p => new PlayerModel({ ...p })) as PlayerModel[];
@@ -121,42 +120,41 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.dialog.open(AddGameDialogComponent, {
       width: '90%',
       disableClose: true,
+      backdropClass: 'blurred-backdrop',
+      panelClass: 'custom-dialog-panel',
       data: { mode: ModalMode.Add }
     });
   }
 
   // --- Add Player Feature ---
   showAddPlayer(): void {
-    this.showAddPlayerInput = true;
-    this.addPlayerName = '';
-    this.addPlayerError = '';
-  }
-
-  cancelAddPlayer(): void {
-    this.showAddPlayerInput = false;
-    this.addPlayerName = '';
-    this.addPlayerError = '';
+    this.dialog.open(this.addPlayerDialog, {
+      width: '90%',
+      disableClose: true,
+      backdropClass: 'blurred-backdrop',
+      panelClass: 'custom-dialog-panel'
+    });
   }
 
   confirmAddPlayer(): void {
-    const name = this.addPlayerName.trim();
-    if (!name) {
-      this.addPlayerError = 'Tên không được để trống.';
-      return;
-    }
-    if (this.gameState.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-      this.addPlayerError = 'Tên người chơi đã tồn tại.';
-      return;
-    }
+    // const name = this.addPlayerName.trim();
+    // if (!name) {
+    //   this.addPlayerError = 'Tên không được để trống.';
+    //   return;
+    // }
+    // if (this.gameState.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+    //   this.addPlayerError = 'Tên người chơi đã tồn tại.';
+    //   return;
+    // }
     // Generate a new unique id
     const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
 
     const newPlayer: PlayerModel = new PlayerModel({
       id: newId,
-      name,
+      name: this.addPlayerForm.value.trim(),
       profileId: Profile.generateProfileId(),
       avatar: Profile.generateRandomAvatar()
-    })
+    });
 
     // Add player to GameService (which will update gameState and persist)
     this.gameService.addPlayer(newPlayer);
@@ -164,9 +162,8 @@ export class BoardComponent implements OnInit, OnDestroy {
     // Add zero scores for all previous results
     this.gameService.addPlayerToResults(newPlayer);
 
-    this.showAddPlayerInput = false;
-    this.addPlayerName = '';
-    this.addPlayerError = '';
+    this.addPlayerForm.reset();
+    this.dialog.closeAll();
   }
 
   editGame(result: GameResult, rowIndex: number): void {
@@ -177,6 +174,8 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.dialog.open(AddGameDialogComponent, {
       width: '90%',
       disableClose: true,
+      backdropClass: 'blurred-backdrop',
+      panelClass: 'custom-dialog-panel',
       data: {
         mode: ModalMode.View,
         result: result,

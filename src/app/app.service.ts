@@ -77,9 +77,12 @@ export class AppService {
     }
     const basePath = this.gamePath;
     const documentRef = doc(this.firestore, basePath, path);
-    onSnapshot(documentRef, (docSnap) => {
+    onSnapshot(documentRef, (docSnap) => {      
       if (docSnap.exists() && this._isRunningGame) {
         const data = docSnap.data() as GameState;
+        if (!data?.players || !data?.results) {
+          return;
+        }
         console.log('Received real-time data:', docSnap.data());
         service.pushGameData(data);
         service.saveToStorage();

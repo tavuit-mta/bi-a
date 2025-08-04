@@ -396,3 +396,17 @@ td.total-row {
 ::ng-deep button[aria-label*="Xóa"] {
   color: red !important;
 }
+
+.score-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    margin-right: 4px;
+  }
+
+  .trophy-icon {
+    color: red !important;
+  }
+}

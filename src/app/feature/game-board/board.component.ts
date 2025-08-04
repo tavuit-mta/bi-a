@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Renderer2, ChangeDetectorRef, TemplateRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject, takeUntil } from 'rxjs';
+import { distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { GameService } from '../../core/services/game.service';
 import { GameState } from '../../models/game-state.model';
 import { PlayerModel } from '../../models/player.model';
@@ -99,7 +99,9 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.gameService.gameState$
-      .pipe(takeUntil(this.onDestroy$))
+      .pipe(takeUntil(this.onDestroy$),
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
+      )
       .subscribe(state => {
         this.gameState = {
           players: state.players.map((p: PlayerModel) => ({ ...p } as PlayerModel)),
@@ -171,7 +173,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.dialog.closeAll();
   }
 
-  editGame(result: GameResult, rowIndex: number): void {    
+  editGame(result: GameResult, rowIndex: number): void {
     const playersForGame = result.players && result.players.length > 0
       ? result.players
       : this.gameState.players.slice(0, result.nPlayers);
@@ -249,7 +251,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     // Optionally, scroll to the left to ensure all content is visible
     tableWrapperEl.scrollLeft = 0;
-
+    this.showTotalRow = true;
     try {
       if ((window as any).Capacitor?.isNativePlatform()) {
         if (Filesystem.requestPermissions) {
@@ -310,6 +312,8 @@ export class BoardComponent implements OnInit, OnDestroy {
 
         tableWrapperEl.scrollLeft = originalScrollLeft;
         alert('Lưu ảnh thất bại!');
+      }).finally(() => {
+        this.showTotalRow = false;
       });
     }, 100);
   }
@@ -347,6 +351,15 @@ export class BoardComponent implements OnInit, OnDestroy {
       return 0;
     }
     return result.scores[playerIndex] || 0;
+  }
+
+  isWinner(player: PlayerModel, result: GameResult): boolean {
+    const playerIndex = result.players.findIndex(p => p.id === player.id);
+    if (playerIndex === -1) {
+      return false
+    }
+
+    return playerIndex === result.winnerId;
   }
 
   public calculateTransactions(): void {

@@ -5,7 +5,7 @@ import { Profile } from './models/profile.model';
 import { CommonModule } from '@angular/common';
 import { AppService } from './app.service';
 import { BehaviorSubject } from 'rxjs';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -27,8 +27,8 @@ export class AppComponent {
   title = 'BilliardScore';
 
   constructor(
-    private router: Router, 
-    private profileService: ProfileService, 
+    private router: Router,
+    private profileService: ProfileService,
     private appService: AppService,
     private matIconRegistry: MatIconRegistry,
     private domSanitizer: DomSanitizer) {
@@ -39,9 +39,13 @@ export class AppComponent {
 
     this.isLoading$ = this.appService.isLoading$;
 
-      this.matIconRegistry.addSvgIcon(
+    this.matIconRegistry.addSvgIcon(
       'qr_code', // The name you'll use to reference the icon
       this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/qr_code.svg')
+    );
+    this.matIconRegistry.addSvgIcon(
+      'trophy', // The name you'll use to reference the icon
+      this.domSanitizer.bypassSecurityTrustResourceUrl('assets/icons/trophy.svg')
     );
   }
 }

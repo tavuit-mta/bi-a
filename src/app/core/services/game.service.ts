@@ -196,9 +196,14 @@ export class GameService {
       GAME_STATE_KEY,
       JSON.stringify(this._gameState$.value)
     );
-    this.appService.pushGameData(
-      JSON.parse(JSON.stringify(this._gameState$.value))
-    );
+    const preData = localStorage.getItem(GAME_STATE_KEY);
+    if (preData === JSON.stringify(this._gameState$.value)) {
+      console.log('Game state saved to local storage:', this._gameState$.value);
+    } else {
+      this.appService.pushGameData(
+        JSON.parse(JSON.stringify(this._gameState$.value))
+      );
+    }
   }
 
   loadFromStorage(): void {

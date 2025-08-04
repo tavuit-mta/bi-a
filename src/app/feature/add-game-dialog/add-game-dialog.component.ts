@@ -1,5 +1,5 @@
 // Getter to return losers as FormGroup for template type safety
-import { Component, OnInit, Inject, signal, Signal, viewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Inject, signal, Signal, viewChild, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { GameService } from '../../core/services/game.service';
@@ -17,6 +17,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
 import { NumberPatternClearDirective } from '../../shared/number-pattern-clear.directive';
 import { AppService } from '../../app.service';
+import { Subject, takeUntil } from 'rxjs';
 
 
 @Component({
@@ -40,9 +41,9 @@ import { AppService } from '../../app.service';
     NumberPatternClearDirective
   ]
 })
-export class AddGameDialogComponent implements OnInit {
+export class AddGameDialogComponent implements OnInit, OnDestroy {
   private _players: PlayerModel[] = [];
-
+  onDestroy$: Subject<void> = new Subject<void>();
   form!: FormGroup;
   gameState!: GameState;
   totalPoints: number[] = [];
@@ -125,7 +126,11 @@ export class AddGameDialogComponent implements OnInit {
       this.rebuildForm(this.data.result);
     }
     
-    this.gameService.gameState$.subscribe(state => {
+    this.gameService.gameState$
+    .pipe(
+      takeUntil(this.onDestroy$),
+    )
+    .subscribe(state => {
       if (this.data.mode === ModalMode.Add) {
         this.isEditMode = true;
         this.isViewMode = false;
@@ -419,5 +424,10 @@ export class AddGameDialogComponent implements OnInit {
 
   cancel(): void {
     this.dialogRef.close();
+  }
+
+  ngOnDestroy(): void {
+    this.onDestroy$.next();
+    this.onDestroy$.complete();
   }
 }

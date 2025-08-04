@@ -23,46 +23,28 @@
                 </mat-panel-description>
               </mat-expansion-panel-header>
               <div class="player-row">
-                <!-- <mat-form-field appearance="outline" class="tiles-input" subscriptSizing="dynamic">
-                  <mat-label>Số lá còn lại</mat-label>
-                  <input matInput numberPattern type="number" [formControl]="remainingForm(idx)" pattern="[0-9]*" />
-                  <mat-error *ngIf="isError(idx)">
-                    Vui lòng nhập số lá còn lại.
-                  </mat-error>
-                </mat-form-field> -->
-                <div class="custom-form-row">
-                  <label for="commonPoints" class="custom-label">Số lá còn lại</label>
-                  <input id="commonPoints" type="number" class="custom-input" [formControl]="remainingForm(idx)"
+                <div class="custom-form-row" (click)="remainingPoint.focus()">
+                  <label for="remainingPoint" class="custom-label">Số lá còn lại</label>
+                  <input #remainingPoint id="remainingPoint" type="number" class="custom-input" [formControl]="remainingForm(idx)"
                     numberPattern pattern="[0-9]*"/>
                 </div>
                 <div class="extended-per-player" [formGroup]="extendedForm(idx)">
-                  <!-- Common Points Row (always visible) -->
                   <div class="extended-row">
-                    <!-- <mat-form-field appearance="outline" class="extended-input" subscriptSizing="dynamic">
-                      <mat-label>Điểm chung</mat-label>
-                      <input matInput numberPattern type="number" formControlName="commonPoints" pattern="[0-9]*" />
-                    </mat-form-field> -->
-                    <div class="custom-form-row">
+                    <div class="custom-form-row" (click)="commonPoints.focus()">
                       <label for="commonPoints" class="custom-label">Điểm chung</label>
-                      <input id="commonPoints" type="number" class="custom-input" formControlName="commonPoints"
+                      <input #commonPoints id="commonPoints" type="number" class="custom-input" formControlName="commonPoints"
                         numberPattern pattern="[0-9]*"/>
                     </div>
                   </div>
-                  <!-- Penalty Points Row (always visible) -->
+
                   <div class="extended-row">
                     <div class="penalty-payers-list"
                       *ngFor="let payerCtrl of getPenaltyPayersFormArray(idx).controls; let j = index">
                       <div class="penalty-row" *ngIf="idx !== j">
-                        <!-- <mat-form-field appearance="outline" class="penalty-amount-input" subscriptSizing="dynamic"
-                          *ngIf="idx !== j">
-                          <mat-label>Điểm {{ players[j].name }} đền</mat-label>
-                          <input matInput numberPattern type="number"
-                            [formControl]="penaltyControl(payerCtrl, 'amount')" pattern="[0-9]*" />
-                        </mat-form-field> -->
-                        <div class="custom-form-row" *ngIf="idx !== j">
+                        <div class="custom-form-row" *ngIf="idx !== j" (click)="penaltyInput.focus()">
                           <label for="penalty-{{ players[j].id }}" class="custom-label">Điểm {{ players[j].name }}
                             đền</label>
-                          <input name="penalty-{{ players[j].id }}" type="number" class="custom-input"
+                          <input #penaltyInput name="penalty-{{ players[j].id }}" type="number" class="custom-input"
                             [formControl]="penaltyControl(payerCtrl, 'amount')" pattern="[0-9]*" />
                         </div>
                       </div>

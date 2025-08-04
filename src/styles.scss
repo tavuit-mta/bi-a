@@ -41,6 +41,10 @@ body {
 
 body {
   touch-action: manipulation;
+
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none;     /* IE 10+ */
+  user-select: none;         /* Standard syntax */
 }
 
 

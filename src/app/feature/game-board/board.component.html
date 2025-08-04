@@ -15,8 +15,6 @@
     <mat-card-content class="board-content">
       <div class="table-scroll-wrapper table-container" #tableWrapper [ngClass]="{'max-height': !isServerMode}">
         <table mat-table [dataSource]="gameState.results" class="mat-elevation-z8 fixed-width-table">
-
-          <!-- Player columns -->
           <ng-container *ngFor="let player of players; let i = index" [matColumnDef]="columnKeyBuilder(player)">
             <th mat-header-cell *matHeaderCellDef class="fixed-col">
               <mat-chip [disabled]="!player.active">
@@ -25,7 +23,10 @@
               </mat-chip>
             </th>
             <td mat-cell *matCellDef="let element" class="fixed-col">
-              {{ getScore(player, element) }}
+              <div class="score-cell">
+                <span>{{ getScore(player, element) }}</span>
+                <mat-icon svgIcon="trophy" *ngIf="isWinner(player, element)" class="trophy-icon"/>
+              </div>
             </td>
             <td mat-footer-cell *matFooterCellDef class="fixed-col total-row">
               <strong>{{ showTotalRow ? totalScores[i] : '**' }}</strong>
@@ -33,10 +34,8 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; let rowIndex = index; columns: displayedColumns" 
-          LongPress 
-          (longPress)="onLongPress($event, row, rowIndex)"
-            (contextmenu)="$event.preventDefault()"></tr>
+          <tr mat-row *matRowDef="let row; let rowIndex = index; columns: displayedColumns" LongPress
+            (longPress)="onLongPress($event, row, rowIndex)" (contextmenu)="$event.preventDefault()"></tr>
           <tr mat-footer-row *matFooterRowDef="displayedColumns" class="total-row" (click)="toggleTotalRow()"></tr>
         </table>
       </div>
@@ -90,11 +89,8 @@
   </mat-dialog-actions>
 </ng-template>
 
-<div style="position: fixed; visibility: hidden;" 
-  [style.left]="menuPosition.x" 
-  [style.top]="menuPosition.y"
-  #menuTrigger="matMenuTrigger"
-  [matMenuTriggerFor]="rowMenu">
+<div style="position: fixed; visibility: hidden;" [style.left]="menuPosition.x" [style.top]="menuPosition.y"
+  #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="rowMenu">
 </div>
 
 <mat-menu #rowMenu="matMenu" panelClass="pill-menu">
@@ -102,7 +98,8 @@
     <button mat-menu-item color="primary" aria-label="Sửa ván đấu" (click)="editGame(item, rowIndex)">
       Sửa
     </button>
-    <button mat-menu-item *ngIf="isServerMode" color="warn" aria-label="Xóa ván đấu" (click)="deleteGame(item, rowIndex)">
+    <button mat-menu-item *ngIf="isServerMode" color="warn" aria-label="Xóa ván đấu"
+      (click)="deleteGame(item, rowIndex)">
       Xóa
     </button>
   </ng-template>

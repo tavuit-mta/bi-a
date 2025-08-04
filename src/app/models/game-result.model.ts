@@ -6,7 +6,7 @@ export interface PenaltyDetail {
 
 export interface GameResult {
   nPlayers: number;         // Number of players in this game
-  players: { id: number; name: string }[]; // List of players for this game
+  players: { index: number; name: string }[]; // List of players for this game
   winnerId: number;         // Winner's player id
   scores: number[];         // Regular scores, order matches players array
   commonPoints: number[];   // Common point value per player (order matches players)

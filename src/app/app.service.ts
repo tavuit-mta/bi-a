@@ -1,10 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { deleteDoc, doc, docData, DocumentData, Firestore, getDoc, onSnapshot, setDoc, updateDoc, WithFieldValue } from '@angular/fire/firestore';
-import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { GameService } from './core/services/game.service';
 import { GameState } from './models/game-state.model';
 import moment from 'moment';
-import { FIREBASE_PATH, GAME_STATE_KEY, PATH_KEY, SERVER_KEY } from './core/constants/core.constant'; // Adjust the import path as necessary
+import { FIREBASE_PATH, GAME_STATE_KEY, PATH_KEY } from './core/constants/core.constant'; // Adjust the import path as necessary
+import { Device } from '@capacitor/device';
 
 @Injectable({
   providedIn: 'root'
@@ -32,9 +33,15 @@ export class AppService {
     this.isLoading$.next(false);
   }
 
-  get isServer(): boolean {
-    const server = localStorage.getItem(SERVER_KEY);
-    return server === 'true';
+  async isServer(): Promise<boolean> {
+    const device = await Device.getId();
+    const deviceId = device.identifier;
+    const gameState = await this.getGameDataOnce();
+    if (!gameState) {
+      return false;
+    }
+    const { gameSetting: { deviceServer } } = gameState || {gameSetting: { deviceServer: null }};
+    return deviceServer === deviceId;
   }
 
   getGamePath(): string {
@@ -46,9 +53,8 @@ export class AppService {
     return Boolean(gamePath);
   }
 
-  storeGamePath(path: string, isServer: boolean): void {
+  storeGamePath(path: string): void {
     localStorage.setItem(PATH_KEY, path);
-    localStorage.setItem(SERVER_KEY, JSON.stringify(isServer));
   }
 
   initializeGame(path: string, isJoinGame: boolean = false): Promise<GameState> {
@@ -90,14 +96,25 @@ export class AppService {
     });
   }
 
-  getGameDataOnce(): Promise<GameState | undefined> {
+  async getGameDataOnce(): Promise<GameState | undefined> {
     const path = localStorage.getItem(PATH_KEY);
     if (!path) {
       throw new Error('Game path not found in local storage');
     }
     const basePath = this.gamePath;
     const documentRef = doc(this.firestore, basePath, path);
-    return firstValueFrom(docData(documentRef)) as Promise<GameState | undefined>;
+    console.log('Fetching game data from Firestore:', documentRef.path);
+    
+    try {
+      // 3. Convert the observable to a promise that resolves with the first value
+      const userData = await firstValueFrom(docData(documentRef));
+      console.log('User data fetched:', userData);
+      return userData as GameState;
+    } catch (error) {
+      console.error('Error fetching document:', error);
+      // Handle cases where the document might not exist or other errors
+      return undefined;
+    }
   }
 
   pushGameData(data: WithFieldValue<DocumentData>): Promise<void> {
@@ -115,7 +132,6 @@ export class AppService {
   async removeGameData(gameService: GameService): Promise<void> {
     return new Promise<void>((resolve) => {
       localStorage.removeItem(PATH_KEY);
-      localStorage.removeItem(SERVER_KEY);
       localStorage.removeItem(GAME_STATE_KEY);
       resolve();
     });

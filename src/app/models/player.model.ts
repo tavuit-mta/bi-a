@@ -1,5 +1,5 @@
 export interface Player {
-  id: number;
+  index: number;
   name: string;
   profileId: string; 
   avatar: string;
@@ -7,14 +7,14 @@ export interface Player {
 }
 
 export class PlayerModel implements Player {
-  id: number;
+  index: number;
   name: string;
   profileId: string; 
   avatar: string;
   active: boolean;
 
-  constructor({id, name, profileId, avatar, active = true}: {id: number, name: string, profileId: string, avatar: string, active?: boolean}) {
-    this.id = id;
+  constructor({index, name, profileId, avatar, active = true}: {index: number, name: string, profileId: string, avatar: string, active?: boolean}) {
+    this.index = index;
     this.name = name;
     this.profileId = profileId;
     this.avatar = avatar;
@@ -31,7 +31,7 @@ export class PlayerModel implements Player {
 
   toJSON(): Player {
     return {
-      id: this.id,
+      index: this.index,
       name: this.name,
       profileId: this.profileId,
       avatar: this.avatar,

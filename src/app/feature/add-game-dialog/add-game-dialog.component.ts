@@ -101,7 +101,13 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.isServerMode = this.appService.isServer;
+    this.appService.isServer().then(isServer => {
+      this.isServerMode = isServer;
+      console.log('Is server mode:', this.isServerMode);
+    }).catch(err => {
+      console.error('Error checking server mode:', err);
+      this.isServerMode = false;
+    });
   }
 
   ngOnInit(): void {
@@ -116,7 +122,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
       this.editRowIndex = this.data.rowIndex;
       this.players = this.data.players.map((p: PlayerModel) => ({ ...p }));
       this.rebuildForm(this.data.result);
-    } 
+    }
 
     if (this.data.mode === ModalMode.Edit) {
       this.isEditMode = true;
@@ -125,24 +131,24 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
       this.players = this.data.players.map((p: PlayerModel) => ({ ...p }));
       this.rebuildForm(this.data.result);
     }
-    
+
     this.gameService.gameState$
-    .pipe(
-      takeUntil(this.onDestroy$),
-    )
-    .subscribe(state => {
-      if (this.data.mode === ModalMode.Add) {
-        this.isEditMode = true;
-        this.isViewMode = false;
-        this.players = state.players.map(p => ({ ...p } as PlayerModel));
-        this.rebuildForm();
-      }
-    });
+      .pipe(
+        takeUntil(this.onDestroy$),
+      )
+      .subscribe(state => {
+        if (this.data.mode === ModalMode.Add) {
+          this.isEditMode = true;
+          this.isViewMode = false;
+          this.players = state.players.map(p => ({ ...p } as PlayerModel));
+          this.rebuildForm();
+        }
+      });
   }
 
   private rebuildForm(existingResult?: GameResult): void {
     console.log('Result to rebuild form:', existingResult);
-    
+
     this.form = this.fb.group({
       winner: [null, Validators.required],
       losers: this.fb.group({}),
@@ -150,10 +156,10 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
       remainingTiles: this.fb.array([])
     });
     console.log('players in rebuildForm:', this.players);
-    
+
     this.players.forEach((player, idx) => {
       (this.form.get('losers') as FormGroup).addControl(
-        player.id.toString(),
+        player.index.toString(),
         new FormControl({ value: 0, disabled: false })
       );
       (this.form.get('extended') as FormArray).push(
@@ -162,7 +168,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
           penaltyPayers: this.fb.array(
             this.players.map((p, j) =>
               this.fb.group({
-                id: p.id,
+                index: p.index,
                 selected: [false],
                 amount: [null]
               })
@@ -174,9 +180,9 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
         new FormControl(0, Validators.min(0))
       );
     });
-    
+
     this.sortedPlayerIndexes = this.players.map((_, idx) => idx);
-    
+
     if (this.modelMode === ModalMode.View) {
       this.form.disable({ emitEvent: false });
     }
@@ -214,10 +220,10 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
       // Pre-fill penalties
       if (existingResult.penalties) {
         existingResult.penalties.forEach(penalty => {
-          const receiverIdx = this.players.findIndex(p => p.id === penalty.receiverId);
+          const receiverIdx = this.players.findIndex(p => p.index === penalty.receiverId);
           if (receiverIdx !== -1) {
             const penaltyPayersArr = this.getPenaltyPayersFormArray(receiverIdx);
-            const payerIdx = this.players.findIndex(p => p.id === penalty.payerId);
+            const payerIdx = this.players.findIndex(p => p.index === penalty.payerId);
             if (payerIdx !== -1) {
               penaltyPayersArr.at(payerIdx).get('amount')?.setValue(penalty.amount, { emitEvent: false });
             }
@@ -234,7 +240,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
         });
       }
     }
-    
+
     this.form.get('winner')!.valueChanges.subscribe((winnerId) => {
       this.form.reset({ winner: winnerId }, { emitEvent: false });
       this.recalculateAllScores();
@@ -260,7 +266,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
 
   private updateWinnerInput(winnerId: number): void {
     this.remainingTilesArray.controls.forEach((ctrl, idx) => {
-      if (this.players[idx].id === winnerId) {
+      if (this.players[idx].index === winnerId) {
         ctrl.disable({ emitEvent: false });
         ctrl.setValue(0, { emitEvent: false });
       } else {
@@ -274,7 +280,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
 
   private sortPlayersByWinner(winnerId: number): void {
     if (!this.players) return;
-    const winnerIdx = this.players.findIndex(p => p.id === winnerId);
+    const winnerIdx = this.players.findIndex(p => p.index === winnerId);
     if (winnerIdx === -1) {
       this.sortedPlayerIndexes = this.players.map((_, idx) => idx);
       return;
@@ -285,7 +291,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
     ];
 
     if (this.data?.mode === ModalMode.Add) {
-      this.panelOpenState.set(this.sortedPlayerIndexes[0]); 
+      this.panelOpenState.set(this.sortedPlayerIndexes[0]);
     } else {
       this.panelOpenState.set(-1);
     }
@@ -329,7 +335,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
 
     const winnerId = this.form.value.winner;
     if (winnerId !== null && winnerId !== undefined) {
-      const winnerIndex = this.players.findIndex(p => p.id === winnerId);
+      const winnerIndex = this.players.findIndex(p => p.index === winnerId);
       if (winnerIndex !== -1) {
         this.totalPoints[winnerIndex] += this.remainingTilesArray.value.reduce((acc: number, cur: number) => acc + (Number(cur) || 0), 0);
       }
@@ -386,9 +392,9 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
         const amount = Number(payerCtrl.get('amount')?.value);
         if (!isNaN(amount) && amount > 0 && payerIdx !== receiverIdx) {
           penalties.push({
-            payerId: this.players[payerIdx].id,
+            payerId: this.players[payerIdx].index,
             amount,
-            receiverId: this.players[receiverIdx].id
+            receiverId: this.players[receiverIdx].index
           });
         }
       });
@@ -396,7 +402,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
 
     const result: GameResult = {
       nPlayers: this.nPlayers,
-      players: this.players.map(p => ({ id: p.id, name: p.name, profileId: p.profileId, active: p.active })),
+      players: this.players.map(p => ({ index: p.index, name: p.name, profileId: p.profileId, active: p.active })),
       winnerId: this.form.value.winner,
       scores,
       commonPoints,
@@ -406,7 +412,7 @@ export class AddGameDialogComponent implements OnInit, OnDestroy {
 
     if (this.modelMode === ModalMode.Edit && this.editRowIndex !== null) {
       this.gameService.updateGameResult(this.editRowIndex, result);
-    } 
+    }
     if (this.modelMode === ModalMode.Add) {
       this.gameService.addGameResult(result);
     }

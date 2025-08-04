@@ -79,7 +79,7 @@ export class StartComponent implements OnDestroy {
     };
     const GAME_ID = uuidv6(options).toLocaleUpperCase();
     this.appService.initializeGame(GAME_ID).then(() => {
-      this.appService.storeGamePath(GAME_ID, true);
+      this.appService.storeGamePath(GAME_ID);
       this.openSetup();
     }).finally(() => {
       this.appService.stopLoading();
@@ -142,15 +142,14 @@ export class StartComponent implements OnDestroy {
   loadGameData(gameData: GameState | null = null): void {
     if (gameData && gameData.players && gameData.players.length > 0) {
       this.gameService.pushGameData(gameData);
-      this.appService.storeGamePath(this.joinGameCode, false);
+      this.appService.storeGamePath(this.joinGameCode);
       this.openSetup();
       return;
     }
     this.appService.getGameDataOnce().then((gameState: GameState | undefined) => {
-      console.log('Game data loaded:', gameState);
       if (gameState && gameState?.players?.length > 0) {
           this.gameService.pushGameData(gameState);
-          this.appService.storeGamePath(this.joinGameCode, true);
+          this.appService.storeGamePath(this.joinGameCode);
           this.appService.startLoading();
           setTimeout(()=>{
             this.router.navigate(['/board']);

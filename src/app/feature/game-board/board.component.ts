@@ -85,7 +85,14 @@ export class BoardComponent implements OnInit, OnDestroy {
     private renderer: Renderer2,
     private cdr: ChangeDetectorRef
   ) {
-    this.isServerMode = this.appService.isServer;
+    this.appService.isServer().then(isServer => {
+      this.isServerMode = isServer;
+      console.log('Is server mode:', this.isServerMode);
+    }).catch(err => {
+      console.error('Error checking server mode:', err);
+      this.isServerMode = false;
+    });
+
     if (this.gameService.getPlayers().length === 0) {
       this.router.navigate(['/']);
     }
@@ -105,7 +112,8 @@ export class BoardComponent implements OnInit, OnDestroy {
       .subscribe(state => {
         this.gameState = {
           players: state.players.map((p: PlayerModel) => ({ ...p } as PlayerModel)),
-          results: [...state.results]
+          results: [...state.results],
+          gameSetting: state.gameSetting
         };
         const displayedColumns = this.gameState.players.map(p => this.columnKeyBuilder(p));
         this.displayedColumns = [...displayedColumns];
@@ -153,11 +161,11 @@ export class BoardComponent implements OnInit, OnDestroy {
     //   this.addPlayerError = 'Tên người chơi đã tồn tại.';
     //   return;
     // }
-    // Generate a new unique id
-    const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
+    // Generate a new unique index
+    const newIndex = Math.max(0, ...this.gameState.players.map(p => p.index)) + 1;
 
     const newPlayer: PlayerModel = new PlayerModel({
-      id: newId,
+      index: newIndex,
       name: this.addPlayerForm.value.trim(),
       profileId: Profile.generateProfileId(),
       avatar: Profile.generateRandomAvatar()
@@ -219,7 +227,11 @@ export class BoardComponent implements OnInit, OnDestroy {
       this.gameService.putPlayer(currentPlayer);
       const newState: GameState = {
         players: [],
-        results: []
+        results: [],
+        gameSetting: {
+          gameUnit: undefined,
+          deviceServer: undefined
+        }
       };
       this.gameService.pushGameData(newState);
       setTimeout(() => {
@@ -334,7 +346,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     if (this.gameState.results && this.gameState.results.length) {
       for (const result of this.gameState.results) {
         for (let i = 0; i < numPlayers; i++) {
-          var playerIndex = result.players.findIndex(p => p.id === this.gameState.players[i].id);
+          var playerIndex = result.players.findIndex(p => p.index === this.gameState.players[i].index);
           if (playerIndex !== -1) {
             totals[i] += result.scores[playerIndex] || 0;
             this.playerScores[this.gameState.players[i].name] += result.scores[playerIndex] || 0;
@@ -346,7 +358,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   getScore(player: PlayerModel, result: GameResult): number {
-    const playerIndex = result.players.findIndex(p => p.id === player.id);
+    const playerIndex = result.players.findIndex(p => p.index === player.index);
     if (playerIndex === -1) {
       return 0;
     }
@@ -354,7 +366,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   isWinner(player: PlayerModel, result: GameResult): boolean {
-    const playerIndex = result.players.findIndex(p => p.id === player.id);
+    const playerIndex = result.players.findIndex(p => p.index === player.index);
     if (playerIndex === -1) {
       return false
     }

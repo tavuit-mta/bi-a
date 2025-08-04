@@ -9,13 +9,15 @@ import { environment } from '../environments/environment';
 import { DEVICE_ID_KEY } from './core/constants/core.constant';
 import { v4 as uuidv4 } from 'uuid';
 import { provideHttpClient } from '@angular/common/http';
+import { Device } from '@capacitor/device';
 
-function initializeDevice(): void {
-  // Store deviceID in localStorage if not already present
+async function initializeDevice(): Promise<void> {
   if (!localStorage.getItem(DEVICE_ID_KEY)) {
-    const deviceID = uuidv4();
-    localStorage.setItem(DEVICE_ID_KEY, deviceID);
+    const deviceID = await Device.getId();
+    console.log('Device Info:', deviceID);
+    localStorage.setItem(DEVICE_ID_KEY, deviceID.identifier);
   }
+  return Promise.resolve();
 }
 
 export const appConfig: ApplicationConfig = {

@@ -63,7 +63,13 @@ export class SetupComponent implements OnInit, OnDestroy {
     this.playerForm = this.fb.group({
       player: new FormControl(null, [Validators.required]),
     });
-    this.isServerMode = this.appService.isServer;
+    this.appService.isServer().then(isServer => {
+      this.isServerMode = isServer;
+      console.log('Is server mode:', this.isServerMode);
+    }).catch(err => {
+      console.error('Error checking server mode:', err);
+      this.isServerMode = false;
+    });
     combineLatest([
       this.gameService.gameState$,
       this.profileService.getProfile()
@@ -72,7 +78,7 @@ export class SetupComponent implements OnInit, OnDestroy {
         takeUntil(this.onDestroy$),
         distinct(([gameState, profile]) => profile.profileId)
       )
-      .subscribe(([gameState, profile]) => {        
+      .subscribe(([gameState, profile]) => {
         this.profile = profile;
         this.gameState = gameState;
         if (gameState.players.some(p => p.profileId === profile.profileId) && !this.isServerMode) {
@@ -81,7 +87,7 @@ export class SetupComponent implements OnInit, OnDestroy {
             currentPlayer.activePlayer();
             this.gameService.putPlayer(currentPlayer);
             this.appService.startLoading();
-            setTimeout(()=>{
+            setTimeout(() => {
               this.router.navigate(['/board']);
               this.dialogRef.close();
               this.appService.stopLoading();
@@ -121,7 +127,7 @@ export class SetupComponent implements OnInit, OnDestroy {
     }
     const playerName: string = this.player.value?.trim();
     const player: PlayerModel = new PlayerModel({
-      id: 0,
+      index: 0,
       name: playerName,
       profileId: this.profile.profileId,
       avatar: this.profile.avatarUrl || Profile.generateRandomAvatar(),
@@ -130,18 +136,19 @@ export class SetupComponent implements OnInit, OnDestroy {
     if (this.isServerMode) {
       this.gameService.setPlayers([player]);
     } else {
-      const newId = Math.max(0, ...this.gameState.players.map(p => p.id)) + 1;
-      player.id = newId;
+      const newId = Math.max(0, ...this.gameState.players.map(p => p.index)) + 1;
+      player.index = newId;
       this.gameService.addPlayer(player);
       this.gameService.addPlayerToResults(player);
     }
-
-    this.appService.startLoading();
-    setTimeout(()=>{
-      this.router.navigate(['/board']);
-      this.dialogRef.close();
-      this.appService.stopLoading();
-    }, 2000);
+    this.gameService.updateGameSetting().then(() => {
+      this.appService.startLoading();
+      setTimeout(() => {
+        this.router.navigate(['/board']);
+        this.dialogRef.close();
+        this.appService.stopLoading();
+      }, 2000);
+    });
   }
 
   ngOnDestroy(): void {

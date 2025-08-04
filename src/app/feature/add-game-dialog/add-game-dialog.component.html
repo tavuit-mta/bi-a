@@ -5,7 +5,7 @@
   <mat-form-field class="full-width winner-select" appearance="fill" subscriptSizing="dynamic">
     <mat-select class="winner-input" formControlName="winner" placeholder="Chọn người thắng">
       @for (player of players; track player) {
-      <mat-option [value]="player.id">{{player.name}}</mat-option>
+      <mat-option [value]="player.index">{{player.name}}</mat-option>
       }
     </mat-select>
   </mat-form-field>
@@ -42,9 +42,9 @@
                       *ngFor="let payerCtrl of getPenaltyPayersFormArray(idx).controls; let j = index">
                       <div class="penalty-row" *ngIf="idx !== j">
                         <div class="custom-form-row" *ngIf="idx !== j" (click)="penaltyInput.focus()">
-                          <label for="penalty-{{ players[j].id }}" class="custom-label">Điểm {{ players[j].name }}
+                          <label for="penalty-{{ players[j].index }}" class="custom-label">Điểm {{ players[j].name }}
                             đền</label>
-                          <input #penaltyInput name="penalty-{{ players[j].id }}" type="number" class="custom-input"
+                          <input #penaltyInput name="penalty-{{ players[j].index }}" type="number" class="custom-input"
                             [formControl]="penaltyControl(payerCtrl, 'amount')" pattern="[0-9]*" />
                         </div>
                       </div>

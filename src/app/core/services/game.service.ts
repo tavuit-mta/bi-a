@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { GameState } from '../../models/game-state.model';
 import { Player, PlayerModel } from '../../models/player.model';
-import { GameResult, PenaltyDetail } from '../../models/game-result.model';
+import { GameResult } from '../../models/game-result.model';
 import { AppService } from '../../app.service';
 import { CURRENCY_NUMBER_KEY, GAME_STATE_KEY } from '../constants/core.constant';
-import { Unsubscribe } from '@angular/fire/firestore';
+import { GameSetting } from '../../models/game-setting.model';
+import { Device } from '@capacitor/device';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,11 @@ import { Unsubscribe } from '@angular/fire/firestore';
 export class GameService {
   private _gameState$ = new BehaviorSubject<GameState>({
     players: [],
-    results: []
+    results: [],
+    gameSetting: {
+      gameUnit: undefined,
+      deviceServer: undefined
+    }
   });
 
   private _unit$ = new BehaviorSubject<number | null>(10000);
@@ -25,6 +30,21 @@ export class GameService {
     private appService: AppService
   ) {
     this.loadFromStorage();
+  }
+
+  async updateGameSetting(): Promise<void> {
+    console.log('Updating game setting...');
+    const setting: GameSetting = {
+      gameUnit: this._unit$.value?.toString(),
+      deviceServer: localStorage.getItem('DEVICE_ID_KEY') || (await Device.getId()).identifier
+    }
+    const current = this._gameState$.value;
+    const newState: GameState = {
+      ...current,
+      gameSetting: setting
+    };
+    this.pushGameData(newState);
+    this.saveToStorage();
   }
 
   setGameUnit(unit: number): void {
@@ -40,14 +60,15 @@ export class GameService {
     console.log('Pushing game data:', result);
     const resultObject = {
       results: result.results,
-      players: result.players.map(player => new PlayerModel({ ...player })) as PlayerModel[]
+      players: result.players.map(player => new PlayerModel({ ...player })) as PlayerModel[],
+      gameSetting: result.gameSetting
     }
     this._gameState$.next(resultObject);
   }
 
   putPlayer(player: PlayerModel): void {
     const current = this._gameState$.value;
-    const players = current.players.map(p => p.id === player.id ? player : p);
+    const players = current.players.map(p => p.index === player.index ? player : p);
     const newState: GameState = {
       ...current,
       players
@@ -99,7 +120,7 @@ export class GameService {
   removePlayer(playerId: number, index: number): void {
     const current = this._gameState$.value;
     // Remove player from players array
-    const newPlayers = current.players.filter(p => p.id !== playerId);
+    const newPlayers = current.players.filter(p => p.index !== playerId);
     // Remove the player's score and commonPoints from each result
     const newResults = (current.results || []).map(result => {
       const scores = [...result.scores];
@@ -185,18 +206,21 @@ export class GameService {
     return this.appService.removeGameData(this).then(() => {
       const newState: GameState = {
         players: [],
-        results: []
+        results: [],
+        gameSetting: {
+          gameUnit: undefined,
+          deviceServer: undefined
+        }
       };
       this.pushGameData(newState);
     });
   }
 
   saveToStorage(): void {
-    localStorage.setItem(
-      GAME_STATE_KEY,
-      JSON.stringify(this._gameState$.value)
-    );
     const preData = localStorage.getItem(GAME_STATE_KEY);
+    console.log('Saving game state to local storage:', this._gameState$.value);
+    console.log('Previous data:', preData);
+  
     if (preData === JSON.stringify(this._gameState$.value)) {
       console.log('Game state saved to local storage:', this._gameState$.value);
     } else {
@@ -204,6 +228,10 @@ export class GameService {
         JSON.parse(JSON.stringify(this._gameState$.value))
       );
     }
+    localStorage.setItem(
+      GAME_STATE_KEY,
+      JSON.stringify(this._gameState$.value)
+    );
   }
 
   loadFromStorage(): void {

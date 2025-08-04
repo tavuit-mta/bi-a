@@ -1,9 +1,11 @@
-import { Player, PlayerModel } from './player.model';
+import { PlayerModel } from './player.model';
 import { GameResult } from './game-result.model';
+import { GameSetting } from './game-setting.model';
 
 export interface GameState {
   players: PlayerModel[];
   results: GameResult[];
+  gameSetting: GameSetting;
 }
 
 export enum ModalMode {

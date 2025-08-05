@@ -61,11 +61,12 @@ export class StartComponent implements OnDestroy {
     }
   }
 
-  openSetup(): void {
+  openSetup(joinGame: boolean = false): void {
     this.dialog.open(SetupComponent, {
       width: '90%',
       backdropClass: 'blurred-backdrop',
-      panelClass: 'custom-dialog-panel'
+      panelClass: 'custom-dialog-panel',
+      data: { joinGame }
     })
   }
 
@@ -143,7 +144,7 @@ export class StartComponent implements OnDestroy {
     if (gameData && gameData.players && gameData.players.length > 0) {
       this.gameService.pushGameData(gameData);
       this.appService.storeGamePath(this.joinGameCode);
-      this.openSetup();
+      this.openSetup(true);
       return;
     }
     this.appService.getGameDataOnce().then((gameState: GameState | undefined) => {

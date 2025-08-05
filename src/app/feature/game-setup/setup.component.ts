@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
@@ -16,7 +16,7 @@ import { AppService } from '../../app.service';
 import { GameState } from '../../models/game-state.model';
 import { NgxCurrencyDirective } from "ngx-currency";
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 
 @Component({
@@ -58,7 +58,8 @@ export class SetupComponent implements OnInit, OnDestroy {
     private gameService: GameService,
     private profileService: ProfileService,
     private router: Router,
-    private dialogRef: MatDialogRef<SetupComponent>
+    private dialogRef: MatDialogRef<SetupComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { joinGame: boolean } = { joinGame: false },
   ) {
     this.playerForm = this.fb.group({
       player: new FormControl(null, [Validators.required]),
@@ -141,14 +142,23 @@ export class SetupComponent implements OnInit, OnDestroy {
       this.gameService.addPlayer(player);
       this.gameService.addPlayerToResults(player);
     }
-    this.gameService.updateGameSetting().then(() => {
+    if (this.data.joinGame) {
       this.appService.startLoading();
       setTimeout(() => {
         this.router.navigate(['/board']);
         this.dialogRef.close();
         this.appService.stopLoading();
       }, 2000);
-    });
+    } else {
+      this.gameService.updateGameSetting().then(() => {
+        this.appService.startLoading();
+        setTimeout(() => {
+          this.router.navigate(['/board']);
+          this.dialogRef.close();
+          this.appService.stopLoading();
+        }, 2000);
+      });
+    }
   }
 
   ngOnDestroy(): void {

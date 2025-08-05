@@ -40,7 +40,7 @@ export class AppService {
     if (!gameState) {
       return false;
     }
-    const { gameSetting: { deviceServer } } = gameState || {gameSetting: { deviceServer: null }};
+    const deviceServer = gameState?.gameSetting?.deviceServer || null;
     return deviceServer === deviceId;
   }
 
@@ -72,6 +72,8 @@ export class AppService {
         } else {
           reject();
         } 
+      }).catch(()=>{
+        reject();
       })
     });
   }

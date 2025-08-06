@@ -193,3 +193,7 @@
 ::ng-deep div.mat-mdc-select-panel {
   border-radius: 24px !important;
 }
+
+::ng-deep .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:not([aria-disabled=true]):hover {
+    background-color: #F5F5F5 !important;
+}

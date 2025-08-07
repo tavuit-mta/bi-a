@@ -1,11 +1,7 @@
-<div *ngIf="isLoading$ | async" class="spinner-overlay">
-  <mat-progress-spinner
-    class="apple-spinner"
-    mode="indeterminate"
-    [diameter]="50"
-  ></mat-progress-spinner>
-</div>
-
 <div class="app-container">
-    <router-outlet />
+  <div *ngIf="isLoading$ | async" class="spinner-overlay">
+    <mat-progress-spinner class="apple-spinner" mode="indeterminate" [diameter]="50"></mat-progress-spinner>
+  </div>
+
+  <router-outlet />
 </div>

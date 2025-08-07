@@ -5,7 +5,7 @@
 .spinner-overlay {
   /* Define your custom property here */
   --active-indicator-color: #FF383C; 
-
+  z-index: 1000;
   position: fixed;
   top: 0;
   left: 0;
@@ -26,4 +26,8 @@
 
   stroke-width: 8px !important;
   stroke-linecap: round !important;
+}
+
+::ng-deep .cdk-overlay-container {
+  z-index: 9999 !important;
 }

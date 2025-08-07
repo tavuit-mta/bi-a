@@ -26,14 +26,14 @@
                 <div class="custom-form-row" (click)="remainingPoint.focus()">
                   <label for="remainingPoint" class="custom-label">Số lá còn lại</label>
                   <input #remainingPoint id="remainingPoint" type="number" class="custom-input" [formControl]="remainingForm(idx)"
-                    numberPattern pattern="[0-9]*"/>
+                    numberPattern pattern="[0-9]*" (keydown.enter)="togglePanel(idx + 1)" inputmode="numeric"/>
                 </div>
                 <div class="extended-per-player" [formGroup]="extendedForm(idx)">
                   <div class="extended-row">
                     <div class="custom-form-row" (click)="commonPoints.focus()">
                       <label for="commonPoints" class="custom-label">Điểm chung</label>
                       <input #commonPoints id="commonPoints" type="number" class="custom-input" formControlName="commonPoints"
-                        numberPattern pattern="[0-9]*"/>
+                        numberPattern pattern="[0-9]*" (keydown.enter)="togglePanel(idx + 1)" inputmode="numeric"/>
                     </div>
                   </div>
 
@@ -45,7 +45,7 @@
                           <label for="penalty-{{ players[j].index }}" class="custom-label">Điểm {{ players[j].name }}
                             đền</label>
                           <input #penaltyInput name="penalty-{{ players[j].index }}" type="number" class="custom-input"
-                            [formControl]="penaltyControl(payerCtrl, 'amount')" pattern="[0-9]*" />
+                            [formControl]="penaltyControl(payerCtrl, 'amount')" pattern="[0-9]*" (keydown.enter)="togglePanel(idx + 1)" inputmode="numeric"/>
                         </div>
                       </div>
                     </div>

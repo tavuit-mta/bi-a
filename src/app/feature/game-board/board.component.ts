@@ -116,7 +116,7 @@ export class BoardComponent implements OnInit, OnDestroy {
           gameSetting: state.gameSetting
         };
         const displayedColumns = this.gameState.players.map(p => this.columnKeyBuilder(p));
-        this.displayedColumns = [...displayedColumns];
+        this.displayedColumns = [...displayedColumns, 'actions'];
         this.calculateTotals();
       });
     this.gameService.observeGameState();
@@ -366,12 +366,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   isWinner(player: PlayerModel, result: GameResult): boolean {
-    const playerIndex = result.players.findIndex(p => p.index === player.index);
-    if (playerIndex === -1) {
-      return false
-    }
-
-    return playerIndex === result.winnerId;
+    return player.index === result.winnerId;
   }
 
   public calculateTransactions(): void {

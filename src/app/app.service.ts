@@ -13,7 +13,7 @@ import { Device } from '@capacitor/device';
 
 export class AppService {
   firestore = inject(Firestore);
-  gamePath: string = [FIREBASE_PATH, moment().format('YYYY_MM_DD')].join('_');
+  gamePath: string = [FIREBASE_PATH, moment().format('YYYY_MM')].join('_');
   private _isRunningGame: boolean = false;
 
   isRunningGame$: Subject<boolean> = new Subject<boolean>();

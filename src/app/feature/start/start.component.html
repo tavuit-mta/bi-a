@@ -6,18 +6,15 @@
       Tạo trận mới
     </button>
 
-    <!-- <button mat-raised-button color="primary" (click)="joinGame()">
-      Tham gia chơi
-    </button> -->
-
     <button mat-raised-button color="primary" (click)="scanQR()" *ngIf="!startScanning">
       <mat-icon>flip</mat-icon>
       Tham gia cùng bạn
     </button>
 
-    <!-- <button mat-raised-button color="primary" *ngIf="!startScanning">
-      <a [href]="downloadApp()">Download app</a>
-    </button> -->
+    <button mat-raised-button color="primary" (click)="scanQR(true)" *ngIf="!startScanning">
+      <mat-icon>monitor</mat-icon>
+      Xem trận đấu
+    </button>
   </div>
 
   <div *ngIf="startScanning" class="scan-overlay">

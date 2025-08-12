@@ -64,27 +64,9 @@
       <button mat-fab class="add-new-game" aria-label="Thêm Ván Đấu" (click)="openAddGameDialog()">
         <mat-icon>add</mat-icon>
       </button>
-      <!-- <button mat-raised-button color="warn" class="action-btn" (click)="endGame()">
-        Thoát ván đấu
-      </button>
-      <button mat-raised-button color="primary" class="action-btn" (click)="showAddPlayer()">
-        Thêm người chơi
-      </button>
-      <button mat-raised-button color="primary" class="action-btn" (click)="showQrCode()">
-        QR game
-      </button>
-      <button mat-raised-button color="primary" class="action-btn" (click)="exportTableAsPngIonic()">
-        Xuất ảnh
-      </button> -->
     </mat-card-actions>
 
     <mat-card-actions class="action-row" *ngIf="!isServerMode">
-      <!-- <button mat-raised-button color="warn" class="action-btn" (click)="outGame()">
-        Thoát ván đấu
-      </button>
-      <button mat-raised-button color="primary" class="action-btn" (click)="exportTableAsPngIonic()">
-        Xuất ảnh
-      </button> -->
     </mat-card-actions>
   </mat-card>
 </div>
@@ -117,9 +99,6 @@
 
 <mat-menu #rowMenu="matMenu" panelClass="pill-menu">
   <ng-template matMenuContent *ngIf="isServerMode">
-    <button mat-menu-item color="warn" class="action-btn" (click)="endGame()">
-      Thoát ván đấu
-    </button>
     <button mat-menu-item color="primary" class="action-btn" (click)="showAddPlayer()">
       Thêm người chơi
     </button>
@@ -129,13 +108,19 @@
     <button mat-menu-item color="primary" class="action-btn" (click)="exportTableAsPngIonic()">
       Xuất ảnh
     </button>
-  </ng-template>
-  <ng-template matMenuContent *ngIf="!isServerMode">
-    <button mat-menu-item color="warn" class="action-btn" (click)="outGame()">
+    <button mat-menu-item color="primary" class="action-btn" (click)="openBillTable()">
+      Tính tiền
+    </button>
+      <button mat-menu-item color="warn" class="action-btn" (click)="endGame()">
       Thoát ván đấu
     </button>
+  </ng-template>
+  <ng-template matMenuContent *ngIf="!isServerMode">
     <button mat-menu-item color="primary" class="action-btn" (click)="exportTableAsPngIonic()">
       Xuất ảnh
+    </button>
+    <button mat-menu-item color="warn" class="action-btn" (click)="outGame()">
+      Thoát ván đấu
     </button>
   </ng-template>
 </mat-menu>

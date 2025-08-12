@@ -94,7 +94,7 @@ export class StartComponent implements OnDestroy {
     this.scannerActive = false; 
   }
 
-  async scanQR(): Promise<void> {
+  async scanQR(isView: boolean = false): Promise<void> {
     try {
       await BarcodeScanner.checkPermission({ force: true });
       BarcodeScanner.hideBackground();
@@ -110,7 +110,7 @@ export class StartComponent implements OnDestroy {
         const scannedCode = result.content;
         this.joinGameCode = scannedCode;
         BarcodeScanner.stopScan();
-        this.confirmJoinGame();
+        this.confirmJoinGame(isView);
       }
 
       this.stopScanQR();
@@ -125,7 +125,7 @@ export class StartComponent implements OnDestroy {
     this.showJoinGame = true;
   }
 
-  confirmJoinGame(): void {
+  confirmJoinGame(isView: boolean = false): void {
     this.appService.initializeGame(this.joinGameCode, true)
       .then((gameData: GameState) => {
         const players = gameData?.players;
@@ -133,18 +133,26 @@ export class StartComponent implements OnDestroy {
           alert('Trò chơi không có người chơi. Vui lòng tạo một trò chơi mới.');
           return;
         }
-        this.loadGameData(gameData);
+        this.loadGameData(gameData, isView);
       })
       .catch(() => {
         alert('Không thể tham gia trò chơi. Vui lòng kiểm tra mã trò chơi và thử lại.');
       });
   }
 
-  loadGameData(gameData: GameState | null = null): void {
+  loadGameData(gameData: GameState | null = null, isView: boolean = false): void {
     if (gameData && gameData.players && gameData.players.length > 0) {
       this.gameService.pushGameData(gameData);
       this.appService.storeGamePath(this.joinGameCode);
-      this.openSetup(true);
+      if (isView) {
+        this.appService.startLoading();
+          setTimeout(()=>{
+            this.router.navigate(['/board']);
+            this.appService.stopLoading();
+          }, 2000);
+      } else {
+        this.openSetup(true);
+      }
       return;
     }
     this.appService.getGameDataOnce().then((gameState: GameState | undefined) => {

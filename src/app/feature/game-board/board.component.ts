@@ -26,7 +26,6 @@ import { Profile } from '../../models/profile.model';
 import { MatChipsModule } from '@angular/material/chips';
 import { ProfileService } from '../../core/services/profile.service';
 import { TransactionComponent } from '../transaction/transaction.component';
-import { LongPressDirective } from '../../shared/long-press.directive';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 @Component({
@@ -113,7 +112,8 @@ export class BoardComponent implements OnInit, OnDestroy {
         this.gameState = {
           players: state.players.map((p: PlayerModel) => ({ ...p } as PlayerModel)),
           results: [...state.results],
-          gameSetting: state.gameSetting
+          gameSetting: state.gameSetting,
+          billTable: [...state.billTable]
         };
         const displayedColumns = this.gameState.players.map(p => this.columnKeyBuilder(p));
         this.displayedColumns = [...displayedColumns, 'actions'];
@@ -231,7 +231,8 @@ export class BoardComponent implements OnInit, OnDestroy {
         gameSetting: {
           gameUnit: undefined,
           deviceServer: undefined
-        }
+        },
+        billTable: []
       };
       this.gameService.pushGameData(newState);
       setTimeout(() => {
@@ -332,6 +333,10 @@ export class BoardComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
+  openBillTable(): void {
+    this.router.navigate(['/billing']);
+  }
+
   private calculateTotals(): void {
     if (!this.gameState || !this.gameState.players) {
       this.totalScores = [];
@@ -340,8 +345,8 @@ export class BoardComponent implements OnInit, OnDestroy {
     const numPlayers = this.gameState.players.length;
     const totals = new Array(numPlayers).fill(0);
 
-    this.playerScores = this.gameState.players.map(p => p.name).reduce((acc: Record<string, number>, name) => {
-      acc[name] = 0;
+    this.playerScores = this.gameState.players.map(p => p.profileId).reduce((acc: Record<string, number>, id) => {
+      acc[id] = 0;
       return acc;
     }, {} as Record<string, number>);
 
@@ -351,12 +356,13 @@ export class BoardComponent implements OnInit, OnDestroy {
           var playerIndex = result.players.findIndex(p => p.index === this.gameState.players[i].index);
           if (playerIndex !== -1) {
             totals[i] += result.scores[playerIndex] || 0;
-            this.playerScores[this.gameState.players[i].name] += result.scores[playerIndex] || 0;
+            this.playerScores[this.gameState.players[i].profileId] += result.scores[playerIndex] || 0;
           }
         }
       }
     }
     this.totalScores = totals;
+    this.gameService.playerScores = this.playerScores
   }
 
   getScore(player: PlayerModel, result: GameResult): number {
@@ -369,15 +375,6 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   isWinner(player: PlayerModel, result: GameResult): boolean {
     return player.index === result.winnerId;
-  }
-
-  public calculateTransactions(): void {
-    const transactions = this.gameService.calculateTransactions(this.playerScores);
-    this.dialog.open(TransactionComponent, {
-      data: {
-        transactions: transactions,
-      }
-    });
   }
 
   onLongPress(event: MouseEvent | TouchEvent, row: GameResult, rowIndex: number) {

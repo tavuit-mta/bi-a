@@ -91,9 +91,9 @@ export class AppService {
         if (!data?.players || !data?.results) {
           return;
         }
-        console.log('Received real-time data:', docSnap.data());
+        console.log('Received real-time data:', data);
         service.pushGameData(data);
-        service.saveToStorage();
+        service.saveToStorage(data, false);
       }
     });
   }

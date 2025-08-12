@@ -28,7 +28,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { TransactionComponent } from '../transaction/transaction.component';
 import { LongPressDirective } from '../../shared/long-press.directive';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
-
+import { MatDividerModule } from '@angular/material/divider';
 @Component({
   standalone: true,
   selector: 'app-board',
@@ -46,8 +46,8 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
     MatFormFieldModule,
     MatInputModule,
     MatChipsModule,
-    LongPressDirective,
-    MatMenuModule
+    MatMenuModule,
+    MatDividerModule
   ],
 })
 export class BoardComponent implements OnInit, OnDestroy {
@@ -260,6 +260,7 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(tableWrapperEl, 'overflow', 'visible');
     this.renderer.setStyle(tableWrapperEl, 'width', tableEl.scrollWidth + 'px');
     this.renderer.setStyle(tableWrapperEl, 'height', tableEl.scrollHeight + 'px');
+    this.displayedColumns = [...this.displayedColumns].filter(col => col !== 'actions'); // Remove actions column for export
 
     // Optionally, scroll to the left to ensure all content is visible
     tableWrapperEl.scrollLeft = 0;
@@ -326,6 +327,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         alert('Lưu ảnh thất bại!');
       }).finally(() => {
         this.showTotalRow = false;
+        this.displayedColumns = [...this.displayedColumns, 'actions']; // Restore actions column
       });
     }, 100);
   }

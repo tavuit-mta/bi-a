@@ -126,6 +126,7 @@ export class SetupComponent implements OnInit, OnDestroy {
       this.playerForm.markAllAsTouched();
       return;
     }
+    this.appService.startLoading();
     const playerName: string = this.player.value?.trim();
     const player: PlayerModel = new PlayerModel({
       index: 0,
@@ -143,7 +144,6 @@ export class SetupComponent implements OnInit, OnDestroy {
       this.gameService.addPlayerToResults(player);
     }
     if (this.data.joinGame) {
-      this.appService.startLoading();
       setTimeout(() => {
         this.router.navigate(['/board']);
         this.dialogRef.close();
@@ -151,7 +151,6 @@ export class SetupComponent implements OnInit, OnDestroy {
       }, 2000);
     } else {
       this.gameService.updateGameSetting().then(() => {
-        this.appService.startLoading();
         setTimeout(() => {
           this.router.navigate(['/board']);
           this.dialogRef.close();

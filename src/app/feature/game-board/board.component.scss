@@ -26,7 +26,7 @@
   width: 100%;
   overflow-x: auto;
   position: relative;
-  height: calc(100vh - 350px - 32px);
+  height: calc(100vh - 200px - 32px);
 }
 
 ::ng-deep .table-scroll-wrapper::-webkit-scrollbar {
@@ -80,7 +80,8 @@
 
   .action-btn {
     flex: 1 1 0;
-    width: 200px;
+    min-width: 200px !important;
+    width: 200px !important;
 
     min-height: 34px;
     border-radius: 20px;
@@ -117,6 +118,41 @@
     margin-top: 8px;
   }
 }
+
+.action-btn {
+  flex: 1 1 0;
+  min-width: 150 !important;
+  width: 150 !important;
+
+  min-height: 34px;
+  border-radius: unset !important;
+
+  font-family: SF Pro;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 20px;
+  letter-spacing: -0.23px;
+}
+
+button[color="warn"] {
+  // background: rgba(255, 56, 60, 0.14);
+  color: rgba(255, 56, 60, 1);
+}
+
+button[color="primary"] {
+  // background: rgba(118, 118, 128, 0.12);
+  color: rgba(0, 0, 0, 1);
+}
+
+.button-container {
+  padding: 5px;
+  border-bottom: 1px solid rgba(219, 219, 219, 1);
+}
+
+.button-container:last-child {
+  border-bottom: none !important;
+}
+
 
 .add-player-actions {
   display: flex;
@@ -358,8 +394,12 @@ td.total-row {
 
 ::ng-deep .mat-mdc-menu-content>div {
   display: flex !important;
-  flex-direction: row !important;
+  flex-direction: column !important;
   align-items: center !important;
+
+  // gap: 10px !important;
+
+  // padding: 8px 14px !important;
 }
 
 ::ng-deep div.mat-mdc-menu-panel {
@@ -367,6 +407,8 @@ td.total-row {
   border-radius: 16px !important;
   min-width: unset !important;
   overflow: hidden !important;
+
+  padding: 8px 0px;
 }
 
 ::ng-deep .mat-mdc-menu-item {

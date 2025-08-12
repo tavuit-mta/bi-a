@@ -216,22 +216,25 @@ export class GameService {
     });
   }
 
-  saveToStorage(): void {
-    const preData = localStorage.getItem(GAME_STATE_KEY);
-    console.log('Saving game state to local storage:', this._gameState$.value);
-    console.log('Previous data:', preData);
-  
-    if (preData === JSON.stringify(this._gameState$.value)) {
-      console.log('Game state saved to local storage:', this._gameState$.value);
-    } else {
-      this.appService.pushGameData(
-        JSON.parse(JSON.stringify(this._gameState$.value))
+  saveToStorage(data: GameState = this._gameState$.value, pushToFB: boolean = true): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      const preData = localStorage.getItem(GAME_STATE_KEY);
+
+      if (preData === JSON.stringify(data)) {
+        console.log('No changes detected, skipping storage update.');
+        return resolve(false);
+      }
+
+      localStorage.setItem(
+        GAME_STATE_KEY,
+        JSON.stringify(data)
       );
-    }
-    localStorage.setItem(
-      GAME_STATE_KEY,
-      JSON.stringify(this._gameState$.value)
-    );
+
+      if (pushToFB) {
+        this.appService.pushGameData(JSON.parse(JSON.stringify(data)));
+      }
+      return resolve(true);
+    });
   }
 
   loadFromStorage(): void {

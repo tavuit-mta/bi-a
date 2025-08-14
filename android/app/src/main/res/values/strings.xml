@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Billiard Score</string>
+    <string name="title_activity_main">Billiard Score</string>
+    <string name="package_name">com.tuanvva3.billiardscore</string>
+    <string name="custom_url_scheme">com.tuanvva3.billiardscore</string>
+</resources>

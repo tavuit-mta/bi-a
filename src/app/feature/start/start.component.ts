@@ -95,30 +95,33 @@ export class StartComponent implements OnDestroy {
   }
 
   async scanQR(isView: boolean = false): Promise<void> {
-    try {
-      await BarcodeScanner.checkPermission({ force: true });
-      BarcodeScanner.hideBackground();
-      this.startScanning = true;
-      this.scannerActive = true;
+    this.joinGameCode = "1F078110-5525-6A4E-9234-0123456789AB";
+    this.confirmJoinGame(isView);
+    return;
+    // try {
+    //   await BarcodeScanner.checkPermission({ force: true });
+    //   BarcodeScanner.hideBackground();
+    //   this.startScanning = true;
+    //   this.scannerActive = true;
 
-      const result = await BarcodeScanner.startScan({
-        cameraDirection: 'back'
-      });
+    //   const result = await BarcodeScanner.startScan({
+    //     cameraDirection: 'back'
+    //   });
 
-      if (result.hasContent) {
-        this.startScanning = false;
-        const scannedCode = result.content;
-        this.joinGameCode = scannedCode;
-        BarcodeScanner.stopScan();
-        this.confirmJoinGame(isView);
-      }
+    //   if (result.hasContent) {
+    //     this.startScanning = false;
+    //     const scannedCode = result.content;
+    //     this.joinGameCode = scannedCode;
+    //     BarcodeScanner.stopScan();
+    //     this.confirmJoinGame(isView);
+    //   }
 
-      this.stopScanQR();
+    //   this.stopScanQR();
 
-    } catch (error) {
-      this.startScanning = false;
-      alert('Failed to scan QR code. Please try again.');
-    }
+    // } catch (error) {
+    //   this.startScanning = false;
+    //   alert('Failed to scan QR code. Please try again.');
+    // }
   }
 
   joinGame(): void {

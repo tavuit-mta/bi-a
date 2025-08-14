@@ -18,6 +18,7 @@ import { GameService } from '../../core/services/game.service';
 import { distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { GameState } from '../../models/game-state.model';
 import { BillTable } from '../../models/game-setting.model';
+import { GameResult } from '../../models/game-result.model';
 
 
 @Component({
@@ -44,6 +45,7 @@ import { BillTable } from '../../models/game-setting.model';
 export class TransactionComponent implements OnDestroy, OnInit {
   onDestroy$: Subject<void> = new Subject<void>();
   gameState!: GameState;
+  totalScores: string[] = [];
   displayedColumns: string[] = [];
   transactions: BillTable[] = [];
   unit: number = 1;
@@ -81,12 +83,20 @@ export class TransactionComponent implements OnDestroy, OnInit {
     }).format(amount * this.unit);
   }
 
+  getScore(player: PlayerModel): number {
+    const playerIndex = this.gameState.players.findIndex(p => p.index === player.index);
+    if (playerIndex === -1) {
+      return 0;
+    }
+    return this.gameState.results[playerIndex].scores[playerIndex] || 0;
+  }
+
   backToHome() {
     this.router.navigate(['/board']);
   }
 
-  columnKeyBuilder(transaction: BillTable): string {
-    return JSON.stringify(transaction);
+  columnKeyBuilder(player: PlayerModel): string {
+    return JSON.stringify(player);
   }
 
   ngOnInit(): void {
@@ -101,12 +111,34 @@ export class TransactionComponent implements OnDestroy, OnInit {
           gameSetting: state.gameSetting,
           billTable: [...state.billTable]
         };
+        this.calculateTotals();
       });
 
     this.transactions = this.gameService.calculateTransactions();
-    const displayedColumns = this.transactions.map(p => this.columnKeyBuilder(p));
+    const displayedColumns = this.players.map(p => this.columnKeyBuilder(p));
     this.displayedColumns = ['title', ...displayedColumns];
-    console.log(this.transactions, 'transactions');
+  }
+
+  private calculateTotals(): void {
+    if (!this.gameState || !this.gameState.players) {
+      this.totalScores = [];
+      return;
+    }
+    const numPlayers = this.gameState.players.length;
+    const totals = new Array(numPlayers).fill(0);
+
+    if (this.gameState.results && this.gameState.results.length) {
+      for (const result of this.gameState.results) {
+        for (let i = 0; i < numPlayers; i++) {
+          var playerIndex = result.players.findIndex(p => p.index === this.gameState.players[i].index);
+          if (playerIndex !== -1) {
+            totals[i] += result.scores[playerIndex] || 0;
+          }
+        }
+      }
+    }
+  
+    this.totalScores = totals.map(t => this.getAmount(t));
   }
 
   ngOnDestroy(): void {

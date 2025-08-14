@@ -23,6 +23,7 @@
     "@angular/router": "^18.2.0",
     "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor-community/media": "^8.0.1",
+    "@capacitor/android": "^7.4.2",
     "@capacitor/camera": "^7.0.1",
     "@capacitor/cli": "^7.4.2",
     "@capacitor/core": "^7.4.2",

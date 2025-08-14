@@ -225,24 +225,24 @@ export class BoardComponent implements OnInit, OnDestroy {
     if (currentPlayer) {
       currentPlayer.inactivePlayer();
       this.gameService.putPlayer(currentPlayer);
-      const newState: GameState = {
-        players: [],
-        results: [],
-        gameSetting: {
-          gameUnit: undefined,
-          deviceServer: undefined
-        },
-        billTable: []
-      };
-      this.gameService.pushGameData(newState);
-      setTimeout(() => {
-        this.appService.removeGameData(this.gameService).then(() => {
-          this.router.navigate(['/']);
-        }).finally(() => {
-          this.appService.stopLoading();
-        });
-      }, 1000);
     }
+    const newState: GameState = {
+      players: [],
+      results: [],
+      gameSetting: {
+        gameUnit: undefined,
+        deviceServer: undefined
+      },
+      billTable: []
+    };
+    this.gameService.pushGameData(newState);
+    setTimeout(() => {
+      this.appService.removeGameData(this.gameService).then(() => {
+        this.router.navigate(['/']);
+      }).finally(() => {
+        this.appService.stopLoading();
+      });
+    }, 1000);
   }
 
   async exportTableAsPngIonic(): Promise<void> {

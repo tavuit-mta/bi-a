@@ -1,58 +1,57 @@
-<div id="board-container" class="board-container">
-  <mat-card>
-    <mat-card-title class="board-title">
-      <span>Bảng thanh toán</span>
-      <button mat-icon-button (click)="backToHome()">
-        <mat-icon>home</mat-icon>
-      </button>
-    </mat-card-title>
+<div class="container">
+  <div id="board-container" class="board-container">
+    <mat-card>
+      <mat-card-title class="board-title">
+        <span>Bảng thanh toán</span>
+        <button mat-icon-button (click)="backToHome()">
+          <mat-icon>home</mat-icon>
+        </button>
+      </mat-card-title>
 
-    <mat-card-content class="board-content">
-      <div class="table-scroll-wrapper table-container" #tableWrapper>
-        <table mat-table [dataSource]="[0]" class="mat-elevation-z8 fixed-width-table">
-          <ng-container *ngFor="let transaction of transactions; let i = index"
-            [matColumnDef]="columnKeyBuilder(transaction)">
-            <th mat-header-cell *matHeaderCellDef class="fixed-col">
-              <mat-chip>
-                <img matChipAvatar [src]="getAvatarFromProfileID(transaction.creditor)" alt="{{ getPlayerFromProfileID(transaction.creditor) }}" />
-                {{ getPlayerFromProfileID(transaction.creditor) }}
-              </mat-chip>
-            </th>
-            <td mat-cell *matCellDef="let element" class="fixed-col">
-              <div class="score-cell">
-                <mat-chip>
-                  <img matChipAvatar [src]="getAvatarFromProfileID(transaction.debtor)" alt="{{ getPlayerFromProfileID(transaction.debtor) }}" />
-                  {{ getPlayerFromProfileID(transaction.debtor) }}
+      <mat-card-content class="board-content">
+        <div class="table-scroll-wrapper table-container" #tableWrapper>
+          <table mat-table [dataSource]="[0]" class="mat-elevation-z8 fixed-width-table">
+            <ng-container *ngFor="let player of players; let i = index"
+              [matColumnDef]="columnKeyBuilder(player)">
+              <th mat-header-cell *matHeaderCellDef class="fixed-col">
+                <mat-chip [disabled]="!player.active">
+                  <img matChipAvatar [src]="player.avatar" alt="{{ player.name }}" />
+                  {{ player.name }}
                 </mat-chip>
-              </div>
-            </td>
-            <td mat-footer-cell *matFooterCellDef class="fixed-col total-row">
-              <strong>{{ getAmount(transaction.amount) }}</strong>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef class="fixed-col action-header">
-              <span>Creditor</span>
-            </th>
-            <td mat-cell *matCellDef="let element; let rowIndex = index" class="fixed-col action-cell">
-              <span>Debtor</span>
-            </td>
-            <td mat-footer-cell *matFooterCellDef class="fixed-col total-row sum-label-footer">
-              <span>Amount</span>
-            </td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; let rowIndex = index; columns: displayedColumns"
-            (contextmenu)="$event.preventDefault()"></tr>
-          <tr mat-footer-row *matFooterRowDef="displayedColumns" class="total-row"></tr>
-        </table>
-      </div>
-    </mat-card-content>
+              </th>
+              <td mat-cell *matCellDef class="fixed-col">
+                <div class="score-cell">
+                  <span>{{ totalScores[i] }}</span>
+                </div>
+              </td>
+              <td mat-footer-cell *matFooterCellDef class="fixed-col total-row">
+                
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef class="fixed-col action-header">
+                <span>Người chơi</span>
+              </th>
+              <td mat-cell *matCellDef="let element; let rowIndex = index" class="fixed-col action-cell">
+                <span>Tiền điểm</span>
+              </td>
+              <td mat-footer-cell *matFooterCellDef class="fixed-col total-row sum-label-footer">
+                <span>Tổng cộng</span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; let rowIndex = index; columns: displayedColumns"
+              (contextmenu)="$event.preventDefault()"></tr>
+            <tr mat-footer-row *matFooterRowDef="displayedColumns" class="total-row"></tr>
+          </table>
+        </div>
+      </mat-card-content>
 
-    <mat-card-actions class="action-row">
-      <button mat-fab class="add-new-game" aria-label="Thêm Ván Đấu">
-        <mat-icon>add</mat-icon>
-      </button>
-    </mat-card-actions>
-  </mat-card>
+      <mat-card-actions class="action-row">
+        <button mat-fab class="add-new-game" aria-label="Thêm Ván Đấu">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
 </div>

@@ -113,7 +113,7 @@ export class BoardComponent implements OnInit, OnDestroy {
           players: state.players.map((p: PlayerModel) => ({ ...p } as PlayerModel)),
           results: [...state.results],
           gameSetting: state.gameSetting,
-          billTable: [...state.billTable]
+          billTable: {...state.billTable}
         };
         const displayedColumns = this.gameState.players.map(p => this.columnKeyBuilder(p));
         this.displayedColumns = [...displayedColumns, 'actions'];
@@ -233,7 +233,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         gameUnit: undefined,
         deviceServer: undefined
       },
-      billTable: []
+      billTable: {}
     };
     this.gameService.pushGameData(newState);
     setTimeout(() => {

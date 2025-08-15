@@ -1,0 +1,252 @@
+::ng-deep .mat-mdc-dialog-content {
+  padding-top: 16px !important;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.loser-title {
+  margin-top: 16px;
+}
+
+.player-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  // gap: 12px;
+
+  background: #fafafa;
+  border-radius: 34px;
+  padding: 16px 24px;
+}
+
+.tiles-input,
+.total-points-input {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.extended-per-player {
+  flex: 1 1 0;
+  min-width: 220px;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  // gap: 8px;
+}
+
+.extended-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  // gap: 8px;
+}
+
+.extended-input,
+.penalty-amount-input {
+  width: 100%;
+  flex: 1 1 0;
+}
+
+.penalty-payers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .player-row {
+    flex-direction: column;
+    // gap: 8px;
+  }
+
+  .tiles-input,
+  .total-points-input,
+  .extended-per-player,
+  .extended-input,
+  .penalty-amount-input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.mat-expansion-panel-header.is-error {
+  background-color: rgb(255 222 222 / 30%) !important;
+}
+
+::ng-deep .mat-expansion-panel {
+  background-color: #F5F5F5 !important;
+}
+
+.winner-select {
+  ::ng-deep .mdc-text-field--filled {
+    background-color: #FAFAFA !important;
+    border-radius: 24px;
+  }
+
+  ::ng-deep .mat-mdc-select-placeholder {
+    font-family: "SF Pro";
+    font-weight: 510 !important;
+    font-size: 17px;
+    color: rgba(60, 60, 67, 0.3) !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-ripple {
+    display: none;
+  }
+
+  ::ng-deep .mdc-line-ripple {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-left: 20px;
+    padding-right: 12px;
+  }
+}
+
+::ng-deep .mat-accordion .mat-expansion-panel:first-of-type {
+  border-top-left-radius: unset !important;
+  border-top-right-radius: unset !important;
+}
+
+::ng-deep .mat-accordion .mat-expansion-panel:last-of-type {
+  border-bottom-right-radius: unset !important;
+  border-bottom-left-radius: unset !important;
+}
+
+::ng-deep .mat-expansion-panel:not([class*=mat-elevation-z]) {
+  box-shadow: none !important;
+}
+
+.winner-info {
+  margin-top: 34px;
+  border-radius: 34px !important;
+  overflow: hidden;
+}
+
+.custom-form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #000000;
+
+  width: 100%;
+}
+
+.penalty-payers-list:last-child .custom-form-row {
+  border-bottom: none !important;
+}
+
+.custom-label {
+  color: #8a8a8e;
+  font-size: 16px;
+}
+
+.custom-input {
+  border: none;
+  background-color: transparent;
+  outline: none;
+
+  color: #000000;
+  font-size: 16px;
+  font-weight: 500;
+  width: 20%;
+}
+
+.custom-input::-webkit-outer-spin-button,
+.custom-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.custom-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.add-player-actions {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+
+  button {
+    flex: 1 1 auto;
+    height: 50px;
+  }
+
+  button[color="warn"] {
+    background: rgba(255, 56, 60, 0.14);
+    color: rgba(255, 56, 60, 1);
+  }
+
+  button[color="primary"] {
+    background: rgba(118, 118, 128, 0.12);
+    color: rgba(0, 0, 0, 1);
+  }
+}
+
+::ng-deep div.mat-mdc-select-panel {
+  border-radius: 24px !important;
+
+  border-top-left-radius: unset !important;
+  border-top-right-radius: unset !important;
+}
+
+::ng-deep .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:not([aria-disabled=true]):hover {
+    background-color: #F5F5F5 !important;
+}
+
+.winner-select {
+  ::ng-deep .mdc-text-field--filled {
+    background-color: #FAFAFA !important;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+
+    border-bottom-left-radius: unset !important;
+    border-bottom-right-radius: unset !important;
+  }
+
+  ::ng-deep .mat-mdc-select-placeholder {
+    font-family: "SF Pro";
+    font-weight: 510 !important;
+    font-size: 17px;
+    color: rgba(60, 60, 67, 0.3) !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-ripple {
+    display: none;
+  }
+
+  ::ng-deep .mdc-line-ripple {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-left: 20px;
+    padding-right: 12px;
+  }
+}
+
+::ng-deep .bank-input {
+  flex: 1;
+  width: 100%;
+  height: 52px;
+
+  .mdc-line-ripple {
+    display: none !important;
+  }
+}
+
+::ng-deep .bank-input {
+  .mdc-text-field {
+    border-bottom-left-radius: 28px;
+    border-bottom-right-radius: 28px;
+
+    background-color: #FAFAFA !important;
+  }
+}

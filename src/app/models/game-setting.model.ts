@@ -8,7 +8,7 @@ export interface GameSetting {
 export interface BillTable {
     id: string;
     debtor: string;
-    creditor: string;
+    payer: string;
     amount: number;
 }
 
@@ -16,10 +16,31 @@ export interface BillTable {
 export class BillTable implements BillTable {
     id: string;
     debtor: string;
-    creditor: string;
+    payer: string;
     amount: number;
 
     constructor(data: Partial<BillTable>) {
+        this.id = uuidv4();
+        this.debtor = data?.debtor || '';
+        this.payer = data?.payer || '';
+        this.amount = data?.amount || 0;
+    }
+}
+
+export interface Transaction {
+    id: string;
+    debtor: string;
+    creditor: string;
+    amount: number;
+}
+
+export class Transaction implements Transaction {
+    id: string;
+    debtor: string;
+    creditor: string;
+    amount: number;
+
+    constructor(data: Partial<Transaction>) {
         this.id = uuidv4();
         this.debtor = data?.debtor || '';
         this.creditor = data?.creditor || '';

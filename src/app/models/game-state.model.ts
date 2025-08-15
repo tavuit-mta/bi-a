@@ -6,7 +6,7 @@ export interface GameState {
   players: PlayerModel[];
   results: GameResult[];
   gameSetting: GameSetting;
-  billTable: BillTable[];
+  billTable: Record<string, BillTable[]>;
 }
 
 export enum ModalMode {

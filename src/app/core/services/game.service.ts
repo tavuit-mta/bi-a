@@ -5,7 +5,7 @@ import { Player, PlayerModel } from '../../models/player.model';
 import { GameResult } from '../../models/game-result.model';
 import { AppService } from '../../app.service';
 import { CURRENCY_NUMBER_KEY, GAME_STATE_KEY } from '../constants/core.constant';
-import { BillTable, GameSetting } from '../../models/game-setting.model';
+import { BillTable, GameSetting, Transaction } from '../../models/game-setting.model';
 import { Device } from '@capacitor/device';
 
 @Injectable({
@@ -19,7 +19,7 @@ export class GameService {
       gameUnit: undefined,
       deviceServer: undefined
     },
-    billTable: []
+    billTable: {}
   });
   public playerScores: Record<string, number> = {};
   private _unit$ = new BehaviorSubject<number | null>(10000);
@@ -30,27 +30,6 @@ export class GameService {
   constructor(
     private appService: AppService
   ) {
-    this.gameState$.subscribe((gameState) => {
-      if (!gameState || !gameState.players) {
-        return;
-      }
-      const numPlayers = gameState.players.length;
-      this.playerScores = gameState.players.map(p => p.profileId).reduce((acc: Record<string, number>, id) => {
-        acc[id] = 0;
-        return acc;
-      }, {} as Record<string, number>);
-
-      if (gameState.results && gameState.results.length) {
-        for (const result of gameState.results) {
-          for (let i = 0; i < numPlayers; i++) {
-            var playerIndex = result.players.findIndex(p => p.index === gameState.players[i].index);
-            if (playerIndex !== -1) {
-              this.playerScores[gameState.players[i].profileId] += result.scores[playerIndex] || 0;
-            }
-          }
-        }
-      }
-    });
     this.loadFromStorage();
   }
 
@@ -76,6 +55,40 @@ export class GameService {
 
   getPlayers(): Player[] {
     return this._gameState$.value.players;
+  }
+
+  pushBillTable(payer: string, billTable: BillTable[]): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const current = this._gameState$.value;
+      const newState: GameState = {
+        ...current,
+        billTable: {
+          ...current.billTable,
+          [payer]: billTable
+        }
+      };
+      console.log('Pushing bill table:', billTable);
+      this.pushGameData(newState);
+      this.saveToStorage();
+      resolve();
+    })
+  }
+
+  deleteBill(billID: string): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const current = this._gameState$.value;
+      const newState: GameState = {
+        ...current,
+        billTable: {
+          ...current.billTable,
+        }
+      };
+      delete newState.billTable[billID];
+      console.log('Deleting bill:', billID);
+      this.pushGameData(newState);
+      this.saveToStorage();
+      resolve();
+    });
   }
 
   pushGameData(result: GameState): void {
@@ -234,7 +247,7 @@ export class GameService {
           gameUnit: undefined,
           deviceServer: undefined
         },
-        billTable: []
+        billTable: {}
       };
       this.pushGameData(newState);
     });
@@ -292,9 +305,9 @@ export class GameService {
   /**
  * Tính toán các giao dịch cần thiết để cân bằng điểm số của người chơi.
  * @param {Object} scores - Một object với key là tên người chơi và value là điểm số.
- * @returns {Array<BillTable>} - Một mảng chứa các đối tượng BillTable mô tả giao dịch.
+ * @returns {Array<Transaction>} - Một mảng chứa các đối tượng Transaction mô tả giao dịch.
  */
-  calculateTransactions(scores: { [key: string]: number } = this.playerScores): BillTable[] {
+  calculateTransactions(scores: { [key: string]: number } = this.playerScores): Transaction[] {
     // 1. Tách người chơi thành hai nhóm: nợ (điểm âm) và nhận (điểm dương)
     const debtors = Object.entries(scores)
       .filter(([name, score]) => score < 0)
@@ -304,7 +317,7 @@ export class GameService {
       .filter(([name, score]) => score > 0)
       .map(([name, score]) => ({ name, amount: score }));
 
-    const transactions = [];
+    const transactions: Transaction[] = [];
 
     // 2. Xử lý giao dịch cho đến khi không còn ai nợ hoặc không còn ai cần nhận
     while (debtors.length > 0 && creditors.length > 0) {
@@ -314,14 +327,14 @@ export class GameService {
       // 3. Xác định số tiền chuyển là số nhỏ hơn giữa số nợ và số cần nhận
       const amountToTransfer = Math.min(debtor.amount, creditor.amount);
 
-      const bill = new BillTable({
+      const transaction = new Transaction({
         debtor: debtor.name,
         creditor: creditor.name,
         amount: amountToTransfer
       });
 
       // Ghi nhận giao dịch
-      transactions.push(bill);
+      transactions.push(transaction);
 
       // 4. Cập nhật lại số tiền của người nợ và người nhận
       debtor.amount -= amountToTransfer;
